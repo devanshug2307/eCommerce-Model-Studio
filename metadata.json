@@ -1,0 +1,5 @@
+{
+  "name": "eCommerce Model Studio",
+  "description": "An application for eCommerce sellers to generate professional model photos for their products. Upload a product image, select model attributes like gender and age, and generate high-quality images ready for online stores like Amazon or Flipkart.",
+  "requestFramePermissions": []
+}
