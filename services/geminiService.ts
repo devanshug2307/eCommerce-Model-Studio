@@ -66,11 +66,12 @@ export const generateImageBatch = async (
   productImage: File,
   options: ModelOptions
 ): Promise<{ src: string, category: string }[]> => {
-  if (!process.env.API_KEY) {
-    throw new Error("API_KEY environment variable is not set.");
+  const apiKey = process.env.API_KEY || import.meta.env.VITE_API_KEY;
+  if (!apiKey) {
+    throw new Error("API_KEY environment variable is not set. Please configure it in your deployment environment.");
   }
 
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const ai = new GoogleGenAI({ apiKey });
   const imagePart = await fileToGenerativePart(productImage);
   
   const shotCategories = [
@@ -126,11 +127,12 @@ export const generateImageVariation = async (
   options: ModelOptions,
   baseImageSrc: string
 ): Promise<string> => {
-  if (!process.env.API_KEY) {
-    throw new Error("API_KEY environment variable is not set.");
+  const apiKey = process.env.API_KEY || import.meta.env.VITE_API_KEY;
+  if (!apiKey) {
+    throw new Error("API_KEY environment variable is not set. Please configure it in your deployment environment.");
   }
 
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const ai = new GoogleGenAI({ apiKey });
   const productPart = await fileToGenerativePart(productImage);
   const baseImagePart = dataUrlToGenerativePart(baseImageSrc);
   const textPart = { text: buildVariationPrompt(options) };
