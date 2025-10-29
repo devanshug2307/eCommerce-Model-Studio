@@ -77,9 +77,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       apiKeyPrefix: apiKey.substring(0, 10) + '...' // Log only first 10 chars for security
     });
 
+    // Determine API base URL based on environment (test or live)
+    // Test Mode: https://test.dodopayments.com
+    // Live Mode: https://live.dodopayments.com
+    const environment = process.env.DODO_PAYMENTS_ENV || 'test';
+    const apiBaseUrl = environment === 'live' 
+      ? 'https://live.dodopayments.com'
+      : 'https://test.dodopayments.com';
+    const apiUrl = `${apiBaseUrl}/v1/checkout_sessions`;
+    
+    console.log('Calling Dodo Payments API:', { apiUrl, apiBaseUrl, environment });
+    
     // The exact endpoint/shape may differ; consult Dodo Payments API docs.
     // Include metadata so webhook can credit the correct user.
-    const response = await fetch('https://api.dodopayments.com/v1/checkout_sessions', {
+    const response = await fetch(apiUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
