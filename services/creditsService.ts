@@ -1,16 +1,18 @@
+import { supabase } from '../lib/supabase';
+
 const STORAGE_KEY = 'ems_user_credits_v1';
-const USER_ID_KEY = 'ems_user_id';
 
 export type CreditPack = 100 | 200 | 300;
 
-// Get user ID from localStorage or generate one
-export function getUserId(): string {
-  let userId = localStorage.getItem(USER_ID_KEY);
-  if (!userId) {
-    userId = `user_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
-    localStorage.setItem(USER_ID_KEY, userId);
+// Get user ID from Supabase auth
+export async function getUserId(): Promise<string | null> {
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    return session?.user?.id ?? null;
+  } catch (error) {
+    console.error('Error getting user ID:', error);
+    return null;
   }
-  return userId;
 }
 
 // Get credits from localStorage (cached)
@@ -36,7 +38,12 @@ export async function fetchCreditsFromDatabase(): Promise<number> {
   }
 
   try {
-    const userId = getUserId();
+    const userId = await getUserId();
+    if (!userId) {
+      console.warn('No user ID available. Using cached credits.');
+      return getCredits();
+    }
+    
     const response = await fetch(`${apiUrl}/api/credits/get?userId=${encodeURIComponent(userId)}`);
     
     if (!response.ok) {
@@ -99,7 +106,11 @@ export async function startCheckout(pack: CreditPack): Promise<{ url: string }> 
   }
 
   try {
-    const userId = getUserId();
+    const userId = await getUserId();
+    
+    if (!userId) {
+      throw new Error('You must be signed in to purchase credits.');
+    }
 
     const response = await fetch(`${apiUrl}/api/credits/createCheckoutSession`, {
       method: 'POST',
