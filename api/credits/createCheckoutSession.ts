@@ -24,8 +24,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
+    console.log('Received checkout request:', { body: req.body, method: req.method });
+    
     const { userId, pack } = req.body as CreateCheckoutBody;
     if (!userId || !pack) {
+      console.error('Missing required fields:', { userId, pack });
       return res.status(400).json({ error: 'Missing userId or pack' });
     }
 
@@ -38,15 +41,41 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const productId = PACK_TO_PRODUCT[pack as CreditPack];
     if (!productId) {
+      console.error('Unsupported pack:', pack);
       return res.status(400).json({ error: 'Unsupported pack' });
     }
 
     // Call Dodo Payments Checkout Sessions (server-side, with your secret)
     // Support both DODO_PAYMENTS_API_KEY and DODOPAYMENTS_API_KEY naming conventions
     const apiKey = process.env.DODO_PAYMENTS_API_KEY || process.env.DODOPAYMENTS_API_KEY;
+    
+    // Log which env var was found (for debugging)
+    const hasDodoPaymentsKey = !!process.env.DODO_PAYMENTS_API_KEY;
+    const hasDodopaymentsKey = !!process.env.DODOPAYMENTS_API_KEY;
+    console.log('Environment variable check:', { 
+      hasDodoPaymentsKey, 
+      hasDodopaymentsKey, 
+      hasApiKey: !!apiKey,
+      appBaseUrl: process.env.APP_BASE_URL 
+    });
+    
     if (!apiKey) {
-      return res.status(500).json({ error: 'Server not configured (DODO_PAYMENTS_API_KEY or DODOPAYMENTS_API_KEY missing).' });
+      console.error('Missing API key in environment variables');
+      return res.status(500).json({ 
+        error: 'Server not configured', 
+        detail: 'DODO_PAYMENTS_API_KEY or DODOPAYMENTS_API_KEY missing from environment variables. Check Vercel dashboard settings.' 
+      });
     }
+
+    // Ensure APP_BASE_URL is set
+    const appBaseUrl = process.env.APP_BASE_URL || 'https://e-commerce-model-studio.vercel.app';
+    console.log('Creating checkout session with:', { 
+      productId, 
+      userId, 
+      pack, 
+      appBaseUrl,
+      apiKeyPrefix: apiKey.substring(0, 10) + '...' // Log only first 10 chars for security
+    });
 
     // The exact endpoint/shape may differ; consult Dodo Payments API docs.
     // Include metadata so webhook can credit the correct user.
@@ -65,18 +94,35 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           credit_pack: String(pack),
         },
         // return_url is used for redirect after payment completion
-        return_url: `${process.env.APP_BASE_URL}/?status=success`,
+        return_url: `${appBaseUrl}/?status=success`,
       }),
     });
 
+    console.log('Dodo Payments API response status:', response.status);
+
     if (!response.ok) {
       const text = await response.text();
-      return res.status(500).json({ error: 'Failed to create checkout session', detail: text });
+      console.error('Dodo Payments API error:', { status: response.status, text });
+      return res.status(500).json({ 
+        error: 'Failed to create checkout session', 
+        detail: text,
+        status: response.status 
+      });
     }
 
     const data = await response.json();
+    console.log('Checkout session created successfully:', { checkoutUrl: data?.checkout_url });
     return res.status(200).json({ url: data?.checkout_url });
   } catch (err: any) {
-    return res.status(500).json({ error: 'Unexpected error', detail: err?.message });
+    console.error('Unexpected error in createCheckoutSession:', {
+      error: err,
+      message: err?.message,
+      stack: err?.stack,
+    });
+    return res.status(500).json({ 
+      error: 'Unexpected error', 
+      detail: err?.message || 'Unknown error occurred',
+      stack: process.env.NODE_ENV === 'development' ? err?.stack : undefined
+    });
   }
 }
