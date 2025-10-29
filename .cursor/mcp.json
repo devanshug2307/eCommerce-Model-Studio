@@ -1,0 +1,22 @@
+{
+  "mcpServers": {
+    "dodopayments_api": {
+      "command": "npx",
+      "args": ["-y", "mcp-remote@latest", "https://mcp.dodopayments.com/sse"]
+    },
+
+    "supabase": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@supabase/mcp-server-supabase@latest",
+        "--project-ref=lkfdimrlbctlughzocis"
+      ],
+      "env": {
+        "SUPABASE_ACCESS_TOKEN": "sbp_644d909d27a220aa4c02f481da0557213a97c109"
+      }
+    }
+  }
+}
+
+

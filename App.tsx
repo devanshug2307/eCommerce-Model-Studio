@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import Header from './components/Header';
 import ImageUploader from './components/ImageUploader';
 import OptionsPanel from './components/OptionsPanel';
@@ -6,6 +6,8 @@ import Button from './components/Button';
 import Spinner from './components/Spinner';
 import { ModelOptions, GeneratedImage } from './types';
 import { generateImageBatch, generateImageVariation } from './services/geminiService';
+import BuyCredits from './components/BuyCredits';
+import { consumeCredits, creditsNeededPerImage, syncCredits } from './services/creditsService';
 
 // Icons for buttons
 const SparklesIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
@@ -41,6 +43,24 @@ function App() {
   const [error, setError] = useState<string | null>(null);
   const [generatingVariationId, setGeneratingVariationId] = useState<string | null>(null);
 
+  // Sync credits from database on mount and after payment
+  useEffect(() => {
+    // Sync credits when app loads
+    syncCredits().catch(console.error);
+
+    // Check if returning from payment
+    const urlParams = new URLSearchParams(window.location.search);
+    const status = urlParams.get('status');
+    
+    if (status === 'success') {
+      // Sync credits after successful payment
+      syncCredits().catch(console.error);
+      
+      // Clean up URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, []);
+
   const handleImageSelect = useCallback((file: File) => {
     setProductImage(file);
     if (productImageUrl) {
@@ -54,6 +74,12 @@ function App() {
   const handleGenerateClick = async () => {
     if (!productImage) {
       setError('Please upload a product image first.');
+      return;
+    }
+    const need = creditsNeededPerImage();
+    const use = consumeCredits(need);
+    if (!use.ok) {
+      setError(`Not enough credits. You need ${need} credits per batch.`);
       return;
     }
     setIsLoading(true);
@@ -78,6 +104,13 @@ function App() {
 
   const handleVariationClick = async (baseImage: GeneratedImage) => {
     if (!productImage) return;
+
+    const need = creditsNeededPerImage();
+    const use = consumeCredits(need);
+    if (!use.ok) {
+      setError(`Not enough credits. You need ${need} credits per variation.`);
+      return;
+    }
 
     setGeneratingVariationId(baseImage.id);
     setError(null);
@@ -208,6 +241,9 @@ function App() {
           </div>
         </div>
       </main>
+      <section id="buy-credits-panel" className="max-w-7xl mx-auto pb-12 px-4 sm:px-6 lg:px-8">
+        <BuyCredits />
+      </section>
     </div>
   );
 }

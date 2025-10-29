@@ -1,4 +1,6 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import Button from './Button';
+import { getCredits, syncCredits } from '../services/creditsService';
 
 const SparklesIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
@@ -8,6 +10,36 @@ const SparklesIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
 
 
 const Header: React.FC = () => {
+  const [credits, setCredits] = useState<number>(0);
+
+  useEffect(() => {
+    // Sync credits from database on mount
+    syncCredits().then(() => setCredits(getCredits())).catch(console.error);
+
+    // Refresh credits display every 5 seconds (and sync from DB every 30 seconds)
+    let syncCounter = 0;
+    const refresh = () => {
+      setCredits(getCredits());
+      syncCounter++;
+      // Sync from database every 30 seconds
+      if (syncCounter >= 6) {
+        syncCounter = 0;
+        syncCredits().then(() => setCredits(getCredits())).catch(console.error);
+      }
+    };
+    
+    refresh();
+    const id = setInterval(refresh, 5000);
+    return () => clearInterval(id);
+  }, []);
+
+  const handleBuy = () => {
+    const el = document.getElementById('buy-credits-panel');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <header className="bg-gray-900/70 backdrop-blur-sm border-b border-gray-700/50 sticky top-0 z-10">
       <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 flex items-center space-x-4">
@@ -15,6 +47,12 @@ const Header: React.FC = () => {
         <div>
           <h1 className="text-xl font-bold text-gray-100">eCommerce Model Studio</h1>
           <p className="text-sm text-gray-400">AI-powered model photography for your products.</p>
+        </div>
+        <div className="ml-auto flex items-center gap-3">
+          <span className="text-sm text-gray-300 bg-gray-800 border border-gray-700/60 rounded-md px-3 py-1">
+            Credits: {credits}
+          </span>
+          <Button onClick={handleBuy} className="text-sm py-1 px-3">Buy Credits</Button>
         </div>
       </div>
     </header>
