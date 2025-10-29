@@ -80,11 +80,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // Determine API base URL based on environment (test or live)
     // Test Mode: https://test.dodopayments.com
     // Live Mode: https://live.dodopayments.com
+    // Endpoint: POST /checkouts (not /checkout_sessions)
     const environment = process.env.DODO_PAYMENTS_ENV || 'test';
     const apiBaseUrl = environment === 'live' 
       ? 'https://live.dodopayments.com'
       : 'https://test.dodopayments.com';
-    const apiUrl = `${apiBaseUrl}/v1/checkout_sessions`;
+    const apiUrl = `${apiBaseUrl}/checkouts`;
     
     console.log('Calling Dodo Payments API:', { apiUrl, apiBaseUrl, environment });
     

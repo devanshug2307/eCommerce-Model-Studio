@@ -1,6 +1,8 @@
 // Vercel Serverless Function webhook handler for Dodo Payments events
 // Stores credits in Supabase database
 
+import type { VercelRequest, VercelResponse } from '@vercel/node';
+
 type CreditPack = 100 | 200 | 300;
 
 // Get Supabase credentials from environment
@@ -70,10 +72,19 @@ function packToCredits(pack: CreditPack): number {
   return pack;
 }
 
-export default async function handler(req: { method?: string; body?: any; headers?: any }, res: { status: (code: number) => { json: (data: any) => void }; json: (data: any) => void }) {
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+  // Set CORS headers (webhooks may need CORS for debugging)
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  // Handle CORS preflight request
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
   if (req.method !== 'POST') {
-    res.status(405).json({ error: 'Method Not Allowed' });
-    return;
+    return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
   try {
@@ -91,12 +102,11 @@ export default async function handler(req: { method?: string; body?: any; header
 
       if (userId && pack) {
         await addCreditsToUser(userId, packToCredits(pack));
-        res.status(200).json({ received: true, eventType, message: `Credited ${pack} credits to user ${userId}` });
-        return;
+        console.log(`Successfully credited ${pack} credits to user ${userId}`);
+        return res.status(200).json({ received: true, eventType, message: `Credited ${pack} credits to user ${userId}` });
       } else {
         console.warn('Missing userId or pack in metadata:', { userId, pack, metadata });
-        res.status(400).json({ error: 'Missing userId or pack in metadata' });
-        return;
+        return res.status(400).json({ error: 'Missing userId or pack in metadata' });
       }
     }
 
@@ -109,16 +119,25 @@ export default async function handler(req: { method?: string; body?: any; header
 
       if (userId && pack) {
         await deductCreditsFromUser(userId, packToCredits(pack));
-        res.status(200).json({ received: true, eventType, message: `Deducted ${pack} credits from user ${userId}` });
-        return;
+        console.log(`Successfully deducted ${pack} credits from user ${userId}`);
+        return res.status(200).json({ received: true, eventType, message: `Deducted ${pack} credits from user ${userId}` });
       }
     }
 
     // Acknowledge other events
-    res.status(200).json({ received: true, eventType });
+    console.log(`Acknowledged webhook event: ${eventType}`);
+    return res.status(200).json({ received: true, eventType });
   } catch (e: any) {
-    console.error('Webhook processing error:', e);
-    res.status(500).json({ error: 'Webhook processing error', detail: e?.message });
+    console.error('Webhook processing error:', {
+      error: e,
+      message: e?.message,
+      stack: e?.stack,
+    });
+    return res.status(500).json({ 
+      error: 'Webhook processing error', 
+      detail: e?.message || 'Unknown error occurred',
+      stack: process.env.NODE_ENV === 'development' ? e?.stack : undefined
+    });
   }
 }
 
