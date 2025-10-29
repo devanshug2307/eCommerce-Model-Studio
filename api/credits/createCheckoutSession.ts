@@ -89,42 +89,93 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     
     console.log('Calling Dodo Payments API:', { apiUrl, apiBaseUrl, environment });
     
-    // The exact endpoint/shape may differ; consult Dodo Payments API docs.
-    // Include metadata so webhook can credit the correct user.
+    // Build request body according to Dodo Payments API documentation
+    // Reference: https://docs.dodopayments.com/api-reference/introduction
+    const requestBody = {
+      product_cart: [
+        { product_id: productId, quantity: 1 },
+      ],
+      // Always provide 'credit' and 'debit' as fallback (required by API)
+      allowed_payment_method_types: ['credit', 'debit'],
+      metadata: {
+        user_id: userId,
+        credit_pack: String(pack),
+      },
+      // return_url is used for redirect after payment completion
+      return_url: `${appBaseUrl}/?status=success`,
+    };
+
+    console.log('Request body being sent to Dodo Payments:', {
+      ...requestBody,
+      metadata: requestBody.metadata, // Keep metadata visible for debugging
+    });
+
     const response = await fetch(apiUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${apiKey}`,
       },
-      body: JSON.stringify({
-        product_cart: [
-          { product_id: productId, quantity: 1 },
-        ],
-        metadata: {
-          user_id: userId,
-          credit_pack: String(pack),
-        },
-        // return_url is used for redirect after payment completion
-        return_url: `${appBaseUrl}/?status=success`,
-      }),
+      body: JSON.stringify(requestBody),
     });
 
     console.log('Dodo Payments API response status:', response.status);
 
+    // Get response text for error handling
+    const responseText = await response.text();
+    
     if (!response.ok) {
-      const text = await response.text();
-      console.error('Dodo Payments API error:', { status: response.status, text });
+      console.error('Dodo Payments API error:', { 
+        status: response.status,
+        statusText: response.statusText,
+        url: apiUrl,
+        responseText 
+      });
+      
+      // Try to parse error response if it's JSON
+      let errorDetail;
+      try {
+        errorDetail = JSON.parse(responseText);
+      } catch {
+        errorDetail = responseText;
+      }
+      
       return res.status(500).json({ 
         error: 'Failed to create checkout session', 
-        detail: text,
-        status: response.status 
+        detail: errorDetail,
+        status: response.status,
+        statusText: response.statusText
       });
     }
 
-    const data = await response.json();
-    console.log('Checkout session created successfully:', { checkoutUrl: data?.checkout_url });
-    return res.status(200).json({ url: data?.checkout_url });
+    // Parse successful response
+    let data;
+    try {
+      data = JSON.parse(responseText);
+    } catch (parseError) {
+      console.error('Failed to parse response JSON:', { responseText, parseError });
+      return res.status(500).json({ 
+        error: 'Failed to parse API response',
+        detail: 'Invalid JSON response from Dodo Payments API'
+      });
+    }
+
+    // Check for checkout_url in response
+    if (!data?.checkout_url) {
+      console.error('Missing checkout_url in API response:', data);
+      return res.status(500).json({ 
+        error: 'Invalid API response', 
+        detail: 'Missing checkout_url in response',
+        response: data
+      });
+    }
+
+    console.log('Checkout session created successfully:', { 
+      checkoutUrl: data.checkout_url,
+      sessionId: data.session_id 
+    });
+    
+    return res.status(200).json({ url: data.checkout_url });
   } catch (err: any) {
     console.error('Unexpected error in createCheckoutSession:', {
       error: err,
