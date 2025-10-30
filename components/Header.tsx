@@ -22,26 +22,22 @@ const Header: React.FC = () => {
   useEffect(() => {
     const onPop = () => setCurrentPath(window.location.pathname);
     window.addEventListener('popstate', onPop);
-    
+
     if (user) {
-      // Sync credits from database on mount
       syncCredits().then(() => setCredits(getCredits())).catch(console.error);
 
-      // Refresh credits display every 5 seconds (and sync from DB every 30 seconds)
       let syncCounter = 0;
       const refresh = () => {
         setCredits(getCredits());
         syncCounter++;
-        // Sync from database every 30 seconds
         if (syncCounter >= 6) {
           syncCounter = 0;
           syncCredits().then(() => setCredits(getCredits())).catch(console.error);
         }
       };
-      
+
       refresh();
       const id = setInterval(refresh, 5000);
-      // Realtime subscription to user_credits for this user
       const channel = supabase
         .channel(`user-credits-${user.id}`)
         .on(
@@ -53,7 +49,6 @@ const Header: React.FC = () => {
             filter: `user_id=eq.${user.id}`,
           },
           () => {
-            // On any change, sync from DB and update UI cache
             syncCredits().then(() => setCredits(getCredits())).catch(console.error);
           }
         )
@@ -104,54 +99,53 @@ const Header: React.FC = () => {
 
   return (
     <>
-      <header className="bg-gray-900/80 backdrop-blur-md border-b border-gray-700/50 sticky top-0 z-50">
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
         <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
             {/* Logo */}
-            <button 
+            <button
               onClick={() => navigateTo('/')}
               className="flex items-center gap-3 group"
             >
-              <div className="relative">
-                <div className="absolute inset-0 bg-blue-500/20 rounded-lg blur-lg group-hover:bg-blue-500/30 transition-colors"></div>
-                <SparklesIcon className="h-8 w-8 text-blue-400 relative" />
+              <div className="w-10 h-10 rounded-lg bg-deep-teal flex items-center justify-center">
+                <SparklesIcon className="h-6 w-6 text-white" />
               </div>
               <div>
-                <h1 className="text-lg font-bold text-gray-100 group-hover:text-white transition-colors">
+                <h1 className="text-xl font-serif font-bold text-rich-black group-hover:text-deep-teal transition-colors">
                   Model Studio
                 </h1>
                 <p className="text-xs text-gray-500">AI Photography</p>
               </div>
             </button>
 
-            {/* Navigation */}
-            <nav className="hidden md:flex items-center gap-1 bg-gray-800/60 border border-gray-700/60 rounded-lg p-1">
+            {/* Desktop Navigation */}
+            <nav className="hidden md:flex items-center gap-2">
               <button
                 onClick={() => navigateTo('/')}
-                className={`px-4 py-2 text-sm rounded-md font-medium transition-all duration-200 ${
-                  currentPath === '/' 
-                    ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg' 
-                    : 'text-gray-300 hover:text-white hover:bg-gray-700/50'
+                className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+                  currentPath === '/'
+                    ? 'bg-teal-light text-deep-teal'
+                    : 'text-gray-600 hover:text-rich-black hover:bg-gray-50'
                 }`}
               >
                 Home
               </button>
               <button
                 onClick={() => navigateTo('/studio')}
-                className={`px-4 py-2 text-sm rounded-md font-medium transition-all duration-200 ${
-                  currentPath === '/studio' 
-                    ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg' 
-                    : 'text-gray-300 hover:text-white hover:bg-gray-700/50'
+                className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+                  currentPath === '/studio'
+                    ? 'bg-teal-light text-deep-teal'
+                    : 'text-gray-600 hover:text-rich-black hover:bg-gray-50'
                 }`}
               >
                 Studio
               </button>
               <button
                 onClick={() => navigateTo('/upgrade')}
-                className={`px-4 py-2 text-sm rounded-md font-medium transition-all duration-200 ${
-                  currentPath === '/upgrade' 
-                    ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg' 
-                    : 'text-gray-300 hover:text-white hover:bg-gray-700/50'
+                className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+                  currentPath === '/upgrade'
+                    ? 'bg-teal-light text-deep-teal'
+                    : 'text-gray-600 hover:text-rich-black hover:bg-gray-50'
                 }`}
               >
                 Pricing
@@ -159,49 +153,49 @@ const Header: React.FC = () => {
             </nav>
 
             {/* Right side - Credits & User */}
-            <div className="flex items-center gap-2 sm:gap-4">
+            <div className="flex items-center gap-3">
               {user && (
-                <div className="flex items-center gap-1.5 sm:gap-2 bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 rounded-lg px-2 sm:px-4 py-1.5 sm:py-2">
-                  <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                <div className="flex items-center gap-2 bg-teal-light border border-deep-teal/20 rounded-lg px-3 py-2">
+                  <svg className="w-4 h-4 text-deep-teal" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z" />
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clipRule="evenodd" />
                   </svg>
-                  <span className="text-xs sm:text-sm font-semibold text-blue-400">{credits}</span>
-                  <span className="hidden sm:inline text-xs text-gray-400">credits</span>
+                  <span className="text-sm font-semibold text-deep-teal">{credits}</span>
+                  <span className="hidden sm:inline text-xs text-gray-600">credits</span>
                 </div>
               )}
-              
+
               {user ? (
                 <div className="relative">
                   <button
                     onClick={() => setMenuOpen(v => !v)}
-                    className="flex items-center gap-1.5 sm:gap-2 focus:outline-none group min-w-0"
+                    className="flex items-center gap-2 focus:outline-none group"
                     title={user.email || ''}
                   >
-                    <span className="hidden md:block text-sm text-gray-200 font-medium group-hover:text-white transition-colors truncate max-w-[100px]">
+                    <span className="hidden md:block text-sm text-gray-700 font-medium group-hover:text-rich-black transition-colors">
                       {displayName}
                     </span>
                     {avatarUrl ? (
-                      <img 
-                        src={avatarUrl} 
-                        alt="avatar" 
-                        className="h-8 w-8 sm:h-9 sm:w-9 rounded-full border-2 border-gray-700 group-hover:border-blue-500 object-cover transition-colors flex-shrink-0" 
+                      <img
+                        src={avatarUrl}
+                        alt="avatar"
+                        className="h-9 w-9 rounded-full border-2 border-gray-200 group-hover:border-deep-teal object-cover transition-colors"
                       />
                     ) : (
-                      <span className="h-8 w-8 sm:h-9 sm:w-9 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 text-white flex items-center justify-center text-xs sm:text-sm font-semibold border-2 border-gray-700 group-hover:border-blue-500 transition-colors flex-shrink-0">
+                      <span className="h-9 w-9 rounded-full bg-deep-teal text-white flex items-center justify-center text-sm font-semibold border-2 border-transparent group-hover:border-teal-hover transition-colors">
                         {initials}
                       </span>
                     )}
                   </button>
                   {menuOpen && (
-                    <div className="absolute right-0 mt-2 w-56 bg-gray-900 border border-gray-700 rounded-xl shadow-2xl z-20 overflow-hidden">
-                      <div className="px-4 py-3 border-b border-gray-700 bg-gray-800/50">
-                        <p className="text-sm font-medium text-gray-100">{displayName}</p>
-                        {user.email && <p className="text-xs text-gray-400 truncate mt-1">{user.email}</p>}
+                    <div className="absolute right-0 mt-2 w-56 bg-white border border-gray-200 rounded-xl shadow-lg z-20 overflow-hidden">
+                      <div className="px-4 py-3 border-b border-gray-100 bg-gray-50">
+                        <p className="text-sm font-medium text-rich-black">{displayName}</p>
+                        {user.email && <p className="text-xs text-gray-500 truncate mt-1">{user.email}</p>}
                       </div>
                       <button
                         onClick={handleSignOut}
-                        className="w-full text-left px-4 py-3 text-sm text-gray-200 hover:bg-gray-800 transition-colors flex items-center gap-2"
+                        className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors flex items-center gap-2"
                       >
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -212,9 +206,10 @@ const Header: React.FC = () => {
                   )}
                 </div>
               ) : (
-                <Button 
-                  onClick={() => setShowAuthModal(true)} 
-                  className="text-xs sm:text-sm py-2 px-3 sm:px-5 font-medium"
+                <Button
+                  onClick={() => setShowAuthModal(true)}
+                  variant="primary"
+                  className="text-sm py-2 px-5"
                 >
                   Sign In
                 </Button>
@@ -222,34 +217,34 @@ const Header: React.FC = () => {
             </div>
           </div>
 
-          {/* Mobile Navigation - Better touch targets */}
-          <nav className="md:hidden flex items-center gap-1 bg-gray-800/60 border border-gray-700/60 rounded-lg p-1 mt-3">
+          {/* Mobile Navigation */}
+          <nav className="md:hidden flex items-center gap-2 mt-3 bg-gray-50 border border-gray-200 rounded-lg p-1">
             <button
               onClick={() => navigateTo('/')}
-              className={`flex-1 px-2 py-2.5 text-xs rounded-md font-medium transition-all duration-200 ${
-                currentPath === '/' 
-                  ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white' 
-                  : 'text-gray-300 hover:text-white hover:bg-gray-700/50'
+              className={`flex-1 px-3 py-2.5 text-xs font-medium rounded-md transition-all duration-200 ${
+                currentPath === '/'
+                  ? 'bg-white text-deep-teal shadow-sm'
+                  : 'text-gray-600 hover:text-rich-black'
               }`}
             >
               Home
             </button>
             <button
               onClick={() => navigateTo('/studio')}
-              className={`flex-1 px-2 py-2.5 text-xs rounded-md font-medium transition-all duration-200 ${
-                currentPath === '/studio' 
-                  ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white' 
-                  : 'text-gray-300 hover:text-white hover:bg-gray-700/50'
+              className={`flex-1 px-3 py-2.5 text-xs font-medium rounded-md transition-all duration-200 ${
+                currentPath === '/studio'
+                  ? 'bg-white text-deep-teal shadow-sm'
+                  : 'text-gray-600 hover:text-rich-black'
               }`}
             >
               Studio
             </button>
             <button
               onClick={() => navigateTo('/upgrade')}
-              className={`flex-1 px-2 py-2.5 text-xs rounded-md font-medium transition-all duration-200 ${
-                currentPath === '/upgrade' 
-                  ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white' 
-                  : 'text-gray-300 hover:text-white hover:bg-gray-700/50'
+              className={`flex-1 px-3 py-2.5 text-xs font-medium rounded-md transition-all duration-200 ${
+                currentPath === '/upgrade'
+                  ? 'bg-white text-deep-teal shadow-sm'
+                  : 'text-gray-600 hover:text-rich-black'
               }`}
             >
               Pricing

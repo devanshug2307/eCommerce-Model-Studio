@@ -4,8 +4,34 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>eCommerce Model Studio</title>
+    <title>AI Model Studio - Transform Products Into Professional Photos</title>
+
+    <!-- Google Fonts: Playfair Display (headings) + Inter (body) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              'serif': ['Playfair Display', 'Georgia', 'serif'],
+              'sans': ['Inter', 'system-ui', 'sans-serif'],
+            },
+            colors: {
+              'warm-white': '#FAFAF9',
+              'soft-cream': '#F5F5F4',
+              'rich-black': '#0A0A0A',
+              'deep-teal': '#0D9488',
+              'teal-hover': '#0F766E',
+              'teal-light': '#CCFBF1',
+            }
+          }
+        }
+      }
+    </script>
   <script type="importmap">
 {
   "imports": {
@@ -19,7 +45,7 @@
 }
 </script>
 </head>
-  <body class="bg-gray-900 text-gray-300">
+  <body class="bg-warm-white text-rich-black font-sans antialiased">
     <div id="root"></div>
     <script type="module" src="/index.tsx"></script>
   </body>
