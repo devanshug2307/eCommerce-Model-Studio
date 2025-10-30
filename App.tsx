@@ -205,7 +205,7 @@ function App() {
   const isGenerateDisabled = !productImage || isLoading;
 
   return (
-    <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-gray-100 min-h-screen font-sans">
+    <div className="bg-warm-white text-rich-black min-h-screen font-sans">
       <Header />
       
       {/* Background gradient orbs */}
@@ -224,11 +224,11 @@ function App() {
             </span>
           </div>
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2 sm:mb-3">
-            <span className="bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
+            <span className="text-rich-black font-serif">
               Create Professional Model Photos
             </span>
           </h1>
-          <p className="text-sm sm:text-base text-gray-400 max-w-2xl mx-auto">
+          <p className="text-sm sm:text-base text-gray-600 max-w-2xl mx-auto">
             Transform your product images into stunning model photos in seconds. Just upload, customize, and generate.
           </p>
         </div>
@@ -241,7 +241,7 @@ function App() {
             <div className="relative">
               <div className="absolute -left-2 sm:-left-3 top-0 w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-xs font-bold text-white">1</div>
               <div className="pl-5 sm:pl-6">
-                <h3 className="text-xs sm:text-sm font-semibold text-gray-300 mb-2 sm:mb-3 uppercase tracking-wider">Upload Product</h3>
+                <h3 className="text-xs sm:text-sm font-semibold text-gray-700 mb-2 sm:mb-3 uppercase tracking-wider">Upload Product</h3>
                 <ImageUploader onImageSelect={handleImageSelect} selectedImageUrl={productImageUrl} />
               </div>
             </div>
@@ -250,7 +250,7 @@ function App() {
             <div className="relative">
               <div className="absolute -left-2 sm:-left-3 top-0 w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-xs font-bold text-white">2</div>
               <div className="pl-5 sm:pl-6">
-                <h3 className="text-xs sm:text-sm font-semibold text-gray-300 mb-2 sm:mb-3 uppercase tracking-wider">Customize Model</h3>
+                <h3 className="text-xs sm:text-sm font-semibold text-gray-700 mb-2 sm:mb-3 uppercase tracking-wider">Customize Model</h3>
                 <OptionsPanel options={options} setOptions={setOptions} isDisabled={isLoading} />
               </div>
             </div>
@@ -259,8 +259,8 @@ function App() {
             <div className="relative lg:sticky lg:bottom-4 pt-2 sm:pt-4">
               <div className="absolute -left-2 sm:-left-3 top-2 sm:top-4 w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-xs font-bold text-white">3</div>
               <div className="pl-5 sm:pl-6">
-                <h3 className="text-xs sm:text-sm font-semibold text-gray-300 mb-2 sm:mb-3 uppercase tracking-wider">Generate</h3>
-                <div className="bg-gray-900/60 backdrop-blur-sm border border-gray-700/50 rounded-xl p-3 sm:p-4">
+                <h3 className="text-xs sm:text-sm font-semibold text-gray-700 mb-2 sm:mb-3 uppercase tracking-wider">Generate</h3>
+                <div className="bg-white backdrop-blur-sm border border-gray-200 rounded-xl p-3 sm:p-4">
                   <Button 
                       onClick={handleGenerateClick} 
                       isLoading={isLoading} 
@@ -285,15 +285,15 @@ function App() {
             <div className="mb-4 sm:mb-6">
               <div className="flex items-center gap-2 sm:gap-3 mb-2">
                 <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-xs sm:text-sm font-bold text-white">4</div>
-                <h3 className="text-lg sm:text-xl font-bold text-gray-100">
+                <h3 className="text-lg sm:text-xl font-bold text-rich-black">
                   Your Generated Photos
                 </h3>
               </div>
-              <p className="text-xs sm:text-sm text-gray-400 ml-9 sm:ml-11">Review, edit, create variations, or download your AI-generated images</p>
+              <p className="text-xs sm:text-sm text-gray-600 ml-9 sm:ml-11">Review, edit, create variations, or download your AI-generated images</p>
             </div>
 
             {isLoading && (
-              <div className="flex flex-col items-center justify-center h-96 bg-gray-900/40 backdrop-blur-sm border border-gray-700/50 rounded-2xl">
+              <div className="flex flex-col items-center justify-center h-96 bg-white backdrop-blur-sm border border-gray-200 rounded-2xl">
                 <div className="relative">
                   <div className="absolute inset-0 bg-blue-500/20 rounded-full blur-2xl"></div>
                   <Spinner className="w-16 h-16 text-blue-400 relative" />
@@ -304,12 +304,12 @@ function App() {
             )}
             
             {!isLoading && generatedImages.length === 0 && (
-              <div className="flex flex-col items-center justify-center h-64 sm:h-96 bg-gray-900/40 backdrop-blur-sm border-2 border-dashed border-gray-600/50 rounded-2xl p-6">
+              <div className="flex flex-col items-center justify-center h-64 sm:h-96 bg-white backdrop-blur-sm border-2 border-dashed border-gray-600/50 rounded-2xl p-6">
                 <div className="text-center max-w-md">
                   <svg className="w-16 h-16 sm:w-20 sm:h-20 mx-auto text-gray-600 mb-3 sm:mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
-                  <p className="text-lg sm:text-xl text-gray-400 font-medium mb-2">No images yet</p>
+                  <p className="text-lg sm:text-xl text-gray-600 font-medium mb-2">No images yet</p>
                   <p className="text-xs sm:text-sm text-gray-500 px-4">Upload a product image, customize your settings, and hit generate to see the magic</p>
                 </div>
               </div>
@@ -322,7 +322,7 @@ function App() {
                     {image.parentId && (
                       <div className="absolute -left-4 sm:-left-6 top-0 bottom-0 w-0.5 bg-gradient-to-b from-blue-500/50 to-purple-500/50"></div>
                     )}
-                    <div className="bg-gray-900/60 backdrop-blur-sm rounded-xl sm:rounded-2xl border border-gray-700/50 overflow-hidden shadow-xl hover:border-gray-600 transition-all duration-300 hover:shadow-2xl hover:shadow-blue-500/10">
+                    <div className="bg-white backdrop-blur-sm rounded-xl sm:rounded-2xl border border-gray-200 overflow-hidden shadow-xl hover:border-gray-600 transition-all duration-300 hover:shadow-2xl hover:shadow-blue-500/10">
                       <div className="relative overflow-hidden">
                         <img src={image.src} alt={image.category} className="w-full h-auto object-cover aspect-[4/5] transition-transform duration-500 ease-out group-hover:scale-105" />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -335,7 +335,7 @@ function App() {
                           </h4>
                         </div>
                       </div>
-                      <div className="p-2 sm:p-3 bg-gray-800/50 flex items-center gap-1.5 sm:gap-2 border-t border-gray-700/50">
+                      <div className="p-2 sm:p-3 bg-gray-800/50 flex items-center gap-1.5 sm:gap-2 border-t border-gray-200">
                         {!image.parentId && (
                           <Button
                             variant="secondary"
@@ -382,7 +382,7 @@ function App() {
         {generatedImages.length > 0 && (
           <div className="mt-8 sm:mt-12 max-w-4xl mx-auto">
             <div className="bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-pink-500/10 border border-blue-500/20 rounded-xl sm:rounded-2xl p-4 sm:p-6 text-center">
-              <p className="text-gray-300 text-xs sm:text-sm">
+              <p className="text-gray-700 text-xs sm:text-sm">
                 🎉 <span className="font-semibold">Great work!</span> Need more credits? 
                 <button 
                   onClick={() => {

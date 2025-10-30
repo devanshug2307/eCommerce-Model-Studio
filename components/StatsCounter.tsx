@@ -68,10 +68,10 @@ const StatCounter: React.FC<StatProps> = ({
 
   return (
     <div ref={ref} className="text-center">
-      <div className="text-3xl sm:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-white via-gray-100 to-gray-300 bg-clip-text text-transparent mb-2">
+      <div className="text-4xl sm:text-5xl lg:text-6xl font-serif font-bold text-rich-black mb-2">
         {prefix}{count.toLocaleString()}{suffix}
       </div>
-      <div className="text-sm sm:text-base text-gray-400">{label}</div>
+      <div className="text-base sm:text-lg text-gray-600">{label}</div>
     </div>
   );
 };

@@ -80,7 +80,7 @@ const BeforeAfterSlider: React.FC<BeforeAfterSliderProps> = ({
           draggable="false"
         />
         {/* After Label */}
-        <div className="absolute top-4 right-4 bg-gradient-to-r from-blue-500 to-purple-500 text-white px-4 py-2 rounded-full text-sm font-semibold shadow-lg backdrop-blur-sm">
+        <div className="absolute top-4 right-4 bg-gradient-to-r from-blue-500 to-purple-500 text-rich-black px-4 py-2 rounded-full text-sm font-semibold shadow-lg backdrop-blur-sm">
           {afterLabel}
         </div>
       </div>
@@ -97,7 +97,7 @@ const BeforeAfterSlider: React.FC<BeforeAfterSliderProps> = ({
           draggable="false"
         />
         {/* Before Label */}
-        <div className="absolute top-4 left-4 bg-gray-800 text-white px-4 py-2 rounded-full text-sm font-semibold shadow-lg backdrop-blur-sm">
+        <div className="absolute top-4 left-4 bg-white text-rich-black px-4 py-2 rounded-full text-sm font-semibold shadow-lg backdrop-blur-sm">
           {beforeLabel}
         </div>
       </div>
@@ -141,7 +141,7 @@ const BeforeAfterSlider: React.FC<BeforeAfterSliderProps> = ({
       </div>
 
       {/* Hint text (shows on hover) */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/50 text-white px-4 py-2 rounded-full text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none backdrop-blur-sm">
+      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/50 text-rich-black px-4 py-2 rounded-full text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none backdrop-blur-sm">
         Drag to compare
       </div>
     </div>

@@ -51,8 +51,8 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageSelect, selectedIm
           isDragging
             ? 'border-blue-500 bg-blue-500/10 scale-[1.02]'
             : selectedImageUrl
-            ? 'border-gray-600 bg-gray-800/40 hover:border-gray-500'
-            : 'border-gray-600 bg-gray-900/40 hover:border-blue-500 hover:bg-gray-800/40'
+            ? 'border-gray-300 bg-soft-cream hover:border-gray-500'
+            : 'border-gray-300 bg-white hover:border-blue-500 hover:bg-soft-cream'
         }`}
         onClick={() => fileInputRef.current?.click()}
         onDrop={handleDrop}
@@ -82,7 +82,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageSelect, selectedIm
                 <UploadIcon className="h-8 w-8 text-blue-400" />
               </div>
               <div>
-                <p className="text-sm text-gray-300 font-medium">Click to upload or drag and drop</p>
+                <p className="text-sm text-gray-700 font-medium">Click to upload or drag and drop</p>
                 <p className="text-xs text-gray-500 mt-1">PNG, JPG, WEBP up to 10MB</p>
               </div>
               <div className="flex items-center justify-center gap-2 text-xs text-gray-500">
