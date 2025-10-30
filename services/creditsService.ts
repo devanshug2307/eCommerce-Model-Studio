@@ -39,7 +39,7 @@ export function setCredits(amount: number): void {
 
 // Fetch credits from Supabase database
 export async function fetchCreditsFromDatabase(): Promise<number> {
-  const apiUrl = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_CHECKOUT_API_URL;
+  const apiUrl = (import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_CHECKOUT_API_URL || (typeof window !== 'undefined' ? window.location.origin : '')) as string;
   
   if (!apiUrl) {
     console.warn('No API URL configured. Using cached credits.');
@@ -89,7 +89,7 @@ export function addCredits(amount: number): number {
 
 export async function consumeCredits(amount: number): Promise<{ ok: boolean; remaining: number }>
 {
-  const apiUrl = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_CHECKOUT_API_URL;
+  const apiUrl = (import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_CHECKOUT_API_URL || (typeof window !== 'undefined' ? window.location.origin : '')) as string;
   if (!apiUrl) {
     // Without backend, we cannot safely deduct from DB. Use cached and fail-safe.
     const current = getCredits();
@@ -136,7 +136,7 @@ export function mapPackToCredits(pack: CreditPack): number {
 
 // Start a checkout session on your backend and return redirect URL
 export async function startCheckout(pack: CreditPack): Promise<{ url: string }> {
-  const apiUrl = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_CHECKOUT_API_URL;
+  const apiUrl = (import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_CHECKOUT_API_URL || (typeof window !== 'undefined' ? window.location.origin : '')) as string;
   
   if (!apiUrl) {
     // Fallback: simulate immediate crediting for local development without backend

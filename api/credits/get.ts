@@ -48,12 +48,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(401).json({ error: 'Invalid session' });
     }
 
-    // Fetch user credits from Supabase
+    // Fetch user credits from Supabase as the user (RLS needs the user token)
     const response = await fetch(`${SUPABASE_URL}/rest/v1/user_credits?user_id=eq.${userId}&select=credits`, {
       method: 'GET',
       headers: {
         'apikey': SUPABASE_ANON_KEY,
-        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        'Authorization': `Bearer ${token}`,
       },
     });
 
