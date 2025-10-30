@@ -48,6 +48,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => subscription.unsubscribe();
   }, []);
 
+  // Redirect to dashboard after login by default (helps OAuth returns too)
+  useEffect(() => {
+    if (user && typeof window !== 'undefined') {
+      if (window.location.pathname === '/') {
+        window.history.pushState({}, '', '/studio');
+        window.dispatchEvent(new PopStateEvent('popstate'));
+      }
+    }
+  }, [user]);
+
   const userId = user?.id ?? null;
 
   const signInWithEmail = async (email: string, password: string) => {

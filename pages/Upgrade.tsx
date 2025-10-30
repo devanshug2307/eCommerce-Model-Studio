@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import Header from '../components/Header';
 import Button from '../components/Button';
+import AuthModal from '../components/AuthModal';
+import { useAuth } from '../contexts/AuthContext';
 import { CreditPack, startCheckout } from '../services/creditsService';
 
 type Plan = {
@@ -56,8 +58,16 @@ const PLANS: Plan[] = [
 const UpgradePage: React.FC = () => {
   const [loadingPack, setLoadingPack] = useState<CreditPack | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [authOpen, setAuthOpen] = useState(false);
+  const [pendingPack, setPendingPack] = useState<CreditPack | null>(null);
+  const { user } = useAuth();
 
   const onBuy = async (pack: CreditPack) => {
+    if (!user) {
+      setPendingPack(pack);
+      setAuthOpen(true);
+      return;
+    }
     try {
       setError(null);
       setLoadingPack(pack);
@@ -69,6 +79,14 @@ const UpgradePage: React.FC = () => {
       setLoadingPack(null);
     }
   };
+
+  React.useEffect(() => {
+    // If the user just signed in from the auth modal and selected a plan, resume checkout
+    if (user && pendingPack && !authOpen) {
+      onBuy(pendingPack);
+      setPendingPack(null);
+    }
+  }, [user, authOpen]);
 
   return (
     <div className="bg-gray-800 text-gray-100 min-h-screen font-sans">
@@ -113,6 +131,7 @@ const UpgradePage: React.FC = () => {
           ))}
         </div>
       </main>
+      <AuthModal isOpen={authOpen} onClose={() => setAuthOpen(false)} initialMode="login" />
     </div>
   );
 };

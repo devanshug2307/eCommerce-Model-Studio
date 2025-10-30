@@ -46,6 +46,11 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
         onClose();
         setEmail('');
         setPassword('');
+        // Navigate to dashboard after successful sign-in
+        if (mode === 'login' && window.location.pathname !== '/studio') {
+          window.history.pushState({}, '', '/studio');
+          window.dispatchEvent(new PopStateEvent('popstate'));
+        }
       }
     } catch (err: any) {
       setError(err.message || 'An error occurred');

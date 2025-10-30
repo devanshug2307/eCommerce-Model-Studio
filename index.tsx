@@ -3,6 +3,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import UpgradePage from './pages/Upgrade';
+import HomePage from './pages/Home';
 import { AuthProvider } from './contexts/AuthContext';
 import AuthGuard from './components/AuthGuard';
 
@@ -21,14 +22,20 @@ function Router() {
     return () => window.removeEventListener('popstate', onPop);
   }, []);
 
-  const Page = path === '/upgrade' ? <UpgradePage /> : <App />;
-  return (
-    <AuthProvider>
+  let Page: React.ReactNode;
+  if (path === '/studio') {
+    Page = (
       <AuthGuard>
-        {Page}
+        <App />
       </AuthGuard>
-    </AuthProvider>
-  );
+    );
+  } else if (path === '/upgrade') {
+    Page = <UpgradePage />;
+  } else {
+    Page = <HomePage />;
+  }
+
+  return <AuthProvider>{Page}</AuthProvider>;
 }
 
 root.render(

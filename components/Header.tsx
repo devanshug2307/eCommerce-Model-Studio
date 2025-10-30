@@ -126,6 +126,12 @@ const Header: React.FC = () => {
               Home
             </button>
             <button
+              onClick={() => navigateTo('/studio')}
+              className={`px-3 py-1 text-sm rounded ${currentPath === '/studio' ? 'bg-gray-700 text-white' : 'text-gray-300 hover:text-white'}`}
+            >
+              Dashboard
+            </button>
+            <button
               onClick={() => navigateTo('/upgrade')}
               className={`px-3 py-1 text-sm rounded ${currentPath === '/upgrade' ? 'bg-gray-700 text-white' : 'text-gray-300 hover:text-white'}`}
             >
