@@ -64,7 +64,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (!response.ok) {
       let detail: any = text;
       try { detail = JSON.parse(text); } catch {}
-      return res.status(400).json({ error: 'Failed to deduct credits', detail });
+      const insufficient = typeof detail === 'string' && detail.includes('INSUFFICIENT_CREDITS');
+      return res.status(insufficient ? 402 : 400).json({ error: insufficient ? 'Insufficient credits' : 'Failed to deduct credits', detail });
     }
 
     // The RPC should return the new balance

@@ -79,7 +79,7 @@ function App() {
     const need = creditsNeededPerImage();
     const use = await consumeCredits(need);
     if (!use.ok) {
-      setError(`Not enough credits. You need ${need} credits per batch.`);
+      setError(use.error || `Not enough credits. You need ${need} credits per batch.`);
       return;
     }
     setIsLoading(true);
@@ -108,7 +108,7 @@ function App() {
     const need = creditsNeededPerImage();
     const use = await consumeCredits(need);
     if (!use.ok) {
-      setError(`Not enough credits. You need ${need} credits per variation.`);
+      setError(use.error || `Not enough credits. You need ${need} credits per variation.`);
       return;
     }
 

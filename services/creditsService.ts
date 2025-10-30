@@ -87,7 +87,7 @@ export function addCredits(amount: number): number {
   return next;
 }
 
-export async function consumeCredits(amount: number): Promise<{ ok: boolean; remaining: number }>
+export async function consumeCredits(amount: number): Promise<{ ok: boolean; remaining: number; error?: string }>
 {
   const apiUrl = (import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_CHECKOUT_API_URL || (typeof window !== 'undefined' ? window.location.origin : '')) as string;
   if (!apiUrl) {
@@ -112,7 +112,14 @@ export async function consumeCredits(amount: number): Promise<{ ok: boolean; rem
     });
 
     if (!response.ok) {
-      return { ok: false, remaining: getCredits() };
+      let errorMessage: string | undefined;
+      try {
+        const data = await response.json();
+        errorMessage = data?.error;
+      } catch {}
+      // Refresh local cache from DB to correct stale UI when a deduct fails
+      await syncCredits();
+      return { ok: false, remaining: getCredits(), error: errorMessage };
     }
 
     const data = await response.json();
