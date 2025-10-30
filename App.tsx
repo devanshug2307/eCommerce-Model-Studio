@@ -2,6 +2,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 import Header from './components/Header';
 import ImageUploader from './components/ImageUploader';
 import OptionsPanel from './components/OptionsPanel';
+import ImageEditorModal from './components/ImageEditorModal';
 import Button from './components/Button';
 import Spinner from './components/Spinner';
 import { ModelOptions, GeneratedImage } from './types';
@@ -43,6 +44,9 @@ function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [generatingVariationId, setGeneratingVariationId] = useState<string | null>(null);
+  const [editorTargetId, setEditorTargetId] = useState<string | null>(null);
+  const [editorSrc, setEditorSrc] = useState<string | null>(null);
+  const [editorOpen, setEditorOpen] = useState<boolean>(false);
 
   // Sync credits from database on mount and after payment
   useEffect(() => {
@@ -71,6 +75,53 @@ function App() {
     setGeneratedImages([]);
     setError(null);
   }, [productImageUrl]);
+
+  const applyEditedOutputReplace = async (dataUrl: string) => {
+    try {
+      if (!editorTargetId) return;
+      setGeneratedImages(prev => prev.map(img => img.id === editorTargetId ? { ...img, src: dataUrl, category: img.category + ' (Edited)' } : img));
+      setEditorTargetId(null);
+      setEditorSrc(null);
+      setEditorOpen(false);
+    } catch (e) {
+      console.error('Failed to apply edited image', e);
+      setError('Failed to apply edited image');
+    }
+  };
+
+  const handleEditClick = (image: GeneratedImage) => {
+    setEditorTargetId(image.id);
+    setEditorSrc(image.src);
+    setEditorOpen(true);
+    // scroll to editor panel
+    // no-op (modal opens)
+  };
+
+  const applyEditedOutputNew = async (dataUrl: string) => {
+    try {
+      if (!editorTargetId) return;
+      const parentIndex = generatedImages.findIndex(img => img.id === editorTargetId);
+      const newImage: GeneratedImage = {
+        id: `edit-${editorTargetId}-${Date.now()}`,
+        src: dataUrl,
+        category: 'Edited Version',
+        parentId: editorTargetId,
+      };
+      if (parentIndex !== -1) {
+        const next = [...generatedImages];
+        next.splice(parentIndex + 1, 0, newImage);
+        setGeneratedImages(next);
+      } else {
+        setGeneratedImages(prev => [newImage, ...prev]);
+      }
+      setEditorTargetId(null);
+      setEditorSrc(null);
+      setEditorOpen(false);
+    } catch (e) {
+      console.error('Failed to create new edited image', e);
+      setError('Failed to create new edited image');
+    }
+  };
 
   const handleGenerateClick = async () => {
     if (!productImage) {
@@ -228,6 +279,14 @@ function App() {
                       <Button
                         variant="secondary"
                         className="flex-1 text-xs py-2"
+                        onClick={() => handleEditClick(image)}
+                        title="Edit Image"
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        className="flex-1 text-xs py-2"
                         onClick={() => handleDownloadClick(image.src, image.category)}
                         title="Download Image"
                         icon={<DownloadIcon className="h-4 w-4" />}
@@ -246,8 +305,18 @@ function App() {
       <section id="buy-credits-panel" className="max-w-7xl mx-auto pb-12 px-4 sm:px-6 lg:px-8">
         <BuyCredits />
       </section>
+      <ImageEditorModal
+        open={!!editorOpen}
+        src={editorSrc}
+        title={generatedImages.find(g => g.id === editorTargetId)?.category || 'Edit Image'}
+        onClose={() => { setEditorOpen(false); setEditorSrc(null); setEditorTargetId(null); }}
+        onApplyNew={applyEditedOutputNew}
+        onReplace={applyEditedOutputReplace}
+      />
     </div>
   );
 }
 
 export default App;
+// Modal is rendered at root level
+// Place after the main JSX by returning a fragment or include at bottom of tree
