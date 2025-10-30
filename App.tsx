@@ -152,8 +152,13 @@ function App() {
       try {
         await Promise.all(
           newImages.map(async (img) => {
-            // Best-effort, ignore individual failures
-            await uploadToGallery(img.src);
+            await uploadToGallery(img.src, {
+              gender: options.gender,
+              age: options.age,
+              ethnicity: options.ethnicity,
+              background: options.background,
+              category: img.category,
+            });
           })
         );
       } catch {}

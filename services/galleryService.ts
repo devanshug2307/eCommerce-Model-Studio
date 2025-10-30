@@ -13,9 +13,14 @@ export type GalleryImage = {
   width?: number;
   height?: number;
   created_at: string;
+  gender?: string;
+  age?: string;
+  ethnicity?: string;
+  background?: string;
+  category?: string;
 };
 
-export async function uploadToGallery(dataUrl: string, width?: number, height?: number): Promise<GalleryImage | null> {
+export async function uploadToGallery(dataUrl: string, meta?: { width?: number; height?: number; gender?: string; age?: string; ethnicity?: string; background?: string; category?: string }): Promise<GalleryImage | null> {
   const apiUrl = (import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_CHECKOUT_API_URL || (typeof window !== 'undefined' ? window.location.origin : '')) as string;
   const token = await getAccessToken();
   if (!apiUrl || !token) return null;
@@ -23,7 +28,7 @@ export async function uploadToGallery(dataUrl: string, width?: number, height?: 
   const resp = await fetch(`${apiUrl}/api/gallery/upload`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-    body: JSON.stringify({ dataUrl, width, height }),
+    body: JSON.stringify({ dataUrl, ...(meta || {}) }),
   });
   if (!resp.ok) return null;
   const data = await resp.json();

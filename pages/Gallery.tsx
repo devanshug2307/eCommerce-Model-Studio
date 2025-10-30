@@ -6,6 +6,7 @@ const GalleryPage: React.FC = () => {
   const [images, setImages] = React.useState<GalleryImage[]>([]);
   const [loading, setLoading] = React.useState<boolean>(true);
   const [rotations, setRotations] = React.useState<Record<string, number>>({});
+  const [openMeta, setOpenMeta] = React.useState<Record<string, boolean>>({});
 
   React.useEffect(() => {
     let mounted = true;
@@ -53,6 +54,21 @@ const GalleryPage: React.FC = () => {
                     download
                   >Download</a>
                 </div>
+                <button
+                  className="mt-2 text-xs text-blue-400 hover:text-blue-300"
+                  onClick={() => setOpenMeta(v => ({ ...v, [img.id]: !v[img.id] }))}
+                >
+                  {openMeta[img.id] ? 'Hide details' : 'Show details'}
+                </button>
+                {openMeta[img.id] && (
+                  <div className="mt-2 text-xs text-gray-300 space-y-1">
+                    {img.category && <div><span className="text-gray-500">Category:</span> {img.category}</div>}
+                    {img.gender && <div><span className="text-gray-500">Gender:</span> {img.gender}</div>}
+                    {img.age && <div><span className="text-gray-500">Age:</span> {img.age}</div>}
+                    {img.ethnicity && <div><span className="text-gray-500">Ethnicity:</span> {img.ethnicity}</div>}
+                    {img.background && <div><span className="text-gray-500">Background:</span> {img.background}</div>}
+                  </div>
+                )}
                 <div className="text-xs text-gray-500 mt-2 break-all">{img.storage_path}</div>
               </div>
             ))}

@@ -26,7 +26,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const userId: string | undefined = user?.id;
     if (!userId) return res.status(401).json({ error: 'Invalid session' });
 
-    const { dataUrl, width, height } = (req.body || {}) as { dataUrl?: string; width?: number; height?: number };
+    const { dataUrl, width, height, gender, age, ethnicity, background, category } = (req.body || {}) as { dataUrl?: string; width?: number; height?: number; gender?: string; age?: string; ethnicity?: string; background?: string; category?: string };
     if (!dataUrl || typeof dataUrl !== 'string' || !dataUrl.startsWith('data:')) {
       return res.status(400).json({ error: 'Missing or invalid dataUrl' });
     }
@@ -79,7 +79,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         'Authorization': `Bearer ${SERVICE_ROLE_KEY}`,
         'Prefer': 'return=representation',
       },
-      body: JSON.stringify({ user_id: userId, storage_path: storagePath, public_url: publicUrl, width, height }),
+      body: JSON.stringify({ 
+        user_id: userId, 
+        storage_path: storagePath, 
+        public_url: publicUrl, 
+        width, 
+        height,
+        gender,
+        age,
+        ethnicity,
+        background,
+        category
+      }),
     });
     if (!insertResp.ok) {
       const t = await insertResp.text();
