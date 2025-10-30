@@ -16,8 +16,13 @@ const Header: React.FC = () => {
   const [credits, setCredits] = useState<number>(0);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const { user, signOut } = useAuth();
+  const [currentPath, setCurrentPath] = useState<string>(typeof window !== 'undefined' ? window.location.pathname : '/');
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
+    const onPop = () => setCurrentPath(window.location.pathname);
+    window.addEventListener('popstate', onPop);
+    
     if (user) {
       // Sync credits from database on mount
       syncCredits().then(() => setCredits(getCredits())).catch(console.error);
@@ -57,16 +62,48 @@ const Header: React.FC = () => {
       return () => {
         clearInterval(id);
         supabase.removeChannel(channel);
+        window.removeEventListener('popstate', onPop);
       };
     }
+    return () => window.removeEventListener('popstate', onPop);
   }, [user]);
 
   const handleBuy = () => {
-    const el = document.getElementById('buy-credits-panel');
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth' });
+    if (window.location.pathname !== '/upgrade') {
+      window.history.pushState({}, '', '/upgrade');
+      window.dispatchEvent(new PopStateEvent('popstate'));
     }
   };
+
+  const navigateTo = (path: string) => {
+    if (window.location.pathname !== path) {
+      window.history.pushState({}, '', path);
+      window.dispatchEvent(new PopStateEvent('popstate'));
+    }
+  };
+
+  const displayName = React.useMemo(() => {
+    if (!user) return '';
+    const md: any = user.user_metadata || {};
+    return (
+      md.full_name || md.name || (md.given_name && md.family_name ? `${md.given_name} ${md.family_name}` : undefined) ||
+      user.email?.split('@')[0] || 'User'
+    );
+  }, [user]);
+
+  const avatarUrl = React.useMemo(() => {
+    if (!user) return '';
+    const md: any = user.user_metadata || {};
+    return md.avatar_url || md.picture || '';
+  }, [user]);
+
+  const initials = React.useMemo(() => {
+    const name = displayName.trim();
+    if (!name) return 'U';
+    const parts = name.split(/\s+/);
+    const letters = (parts[0]?.[0] || '') + (parts[1]?.[0] || '');
+    return letters.toUpperCase() || 'U';
+  }, [displayName]);
 
   const handleSignOut = async () => {
     await signOut();
@@ -81,6 +118,20 @@ const Header: React.FC = () => {
             <h1 className="text-xl font-bold text-gray-100">eCommerce Model Studio</h1>
             <p className="text-sm text-gray-400">AI-powered model photography for your products.</p>
           </div>
+          <nav className="ml-8 hidden md:flex items-center gap-2 bg-gray-800/60 border border-gray-700/60 rounded-md p-1">
+            <button
+              onClick={() => navigateTo('/')}
+              className={`px-3 py-1 text-sm rounded ${currentPath === '/' ? 'bg-gray-700 text-white' : 'text-gray-300 hover:text-white'}`}
+            >
+              Home
+            </button>
+            <button
+              onClick={() => navigateTo('/upgrade')}
+              className={`px-3 py-1 text-sm rounded ${currentPath === '/upgrade' ? 'bg-gray-700 text-white' : 'text-gray-300 hover:text-white'}`}
+            >
+              Upgrade
+            </button>
+          </nav>
           <div className="ml-auto flex items-center gap-3">
             {user && (
               <>
@@ -91,13 +142,37 @@ const Header: React.FC = () => {
               </>
             )}
             {user ? (
-              <div className="flex items-center gap-3">
-                <span className="text-sm text-gray-400">
-                  {user.email}
-                </span>
-                <Button onClick={handleSignOut} variant="secondary" className="text-sm py-1 px-3">
-                  Sign Out
-                </Button>
+              <div className="relative">
+                <button
+                  onClick={() => setMenuOpen(v => !v)}
+                  className="flex items-center gap-2 focus:outline-none"
+                  title={user.email || ''}
+                >
+                  <span className="hidden sm:block text-sm text-gray-200 font-medium">
+                    {displayName}
+                  </span>
+                  {avatarUrl ? (
+                    <img src={avatarUrl} alt="avatar" className="h-8 w-8 rounded-full border border-gray-700 object-cover" />
+                  ) : (
+                    <span className="h-8 w-8 rounded-full bg-gray-700 text-gray-200 flex items-center justify-center text-sm font-semibold border border-gray-600">
+                      {initials}
+                    </span>
+                  )}
+                </button>
+                {menuOpen && (
+                  <div className="absolute right-0 mt-2 w-56 bg-gray-900 border border-gray-700 rounded-md shadow-lg z-20">
+                    <div className="px-4 py-3 border-b border-gray-700">
+                      <p className="text-sm font-medium text-gray-100">{displayName}</p>
+                      {user.email && <p className="text-xs text-gray-400 truncate">{user.email}</p>}
+                    </div>
+                    <button
+                      onClick={handleSignOut}
+                      className="w-full text-left px-4 py-2 text-sm text-gray-200 hover:bg-gray-800"
+                    >
+                      Sign Out
+                    </button>
+                  </div>
+                )}
               </div>
             ) : (
               <Button onClick={() => setShowAuthModal(true)} className="text-sm py-1 px-3">

@@ -2,6 +2,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
+import UpgradePage from './pages/Upgrade';
 import { AuthProvider } from './contexts/AuthContext';
 import AuthGuard from './components/AuthGuard';
 
@@ -11,12 +12,27 @@ if (!rootElement) {
 }
 
 const root = ReactDOM.createRoot(rootElement);
-root.render(
-  <React.StrictMode>
+
+function Router() {
+  const [path, setPath] = React.useState(window.location.pathname);
+  React.useEffect(() => {
+    const onPop = () => setPath(window.location.pathname);
+    window.addEventListener('popstate', onPop);
+    return () => window.removeEventListener('popstate', onPop);
+  }, []);
+
+  const Page = path === '/upgrade' ? <UpgradePage /> : <App />;
+  return (
     <AuthProvider>
       <AuthGuard>
-        <App />
+        {Page}
       </AuthGuard>
     </AuthProvider>
+  );
+}
+
+root.render(
+  <React.StrictMode>
+    <Router />
   </React.StrictMode>
 );
