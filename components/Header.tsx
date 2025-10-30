@@ -3,6 +3,7 @@ import Button from './Button';
 import { getCredits, syncCredits } from '../services/creditsService';
 import { useAuth } from '../contexts/AuthContext';
 import AuthModal from './AuthModal';
+import { supabase } from '../lib/supabase';
 
 const SparklesIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
@@ -35,7 +36,28 @@ const Header: React.FC = () => {
       
       refresh();
       const id = setInterval(refresh, 5000);
-      return () => clearInterval(id);
+      // Realtime subscription to user_credits for this user
+      const channel = supabase
+        .channel(`user-credits-${user.id}`)
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'user_credits',
+            filter: `user_id=eq.${user.id}`,
+          },
+          () => {
+            // On any change, sync from DB and update UI cache
+            syncCredits().then(() => setCredits(getCredits())).catch(console.error);
+          }
+        )
+        .subscribe();
+
+      return () => {
+        clearInterval(id);
+        supabase.removeChannel(channel);
+      };
     }
   }, [user]);
 
