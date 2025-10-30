@@ -76,13 +76,42 @@ export function addCredits(amount: number): number {
   return next;
 }
 
-export function consumeCredits(amount: number): { ok: boolean; remaining: number } {
-  const current = getCredits();
-  if (current < amount) {
-    return { ok: false, remaining: current };
+export async function consumeCredits(amount: number): Promise<{ ok: boolean; remaining: number }>
+{
+  const apiUrl = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_CHECKOUT_API_URL;
+  if (!apiUrl) {
+    // Without backend, we cannot safely deduct from DB. Use cached and fail-safe.
+    const current = getCredits();
+    if (current < amount) return { ok: false, remaining: current };
+    const next = current - amount;
+    setCredits(next);
+    return { ok: true, remaining: next };
   }
-  setCredits(current - amount);
-  return { ok: true, remaining: current - amount };
+
+  try {
+    const userId = await getUserId();
+    if (!userId) {
+      return { ok: false, remaining: getCredits() };
+    }
+
+    const response = await fetch(`${apiUrl}/api/credits/use`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId, amount }),
+    });
+
+    if (!response.ok) {
+      return { ok: false, remaining: getCredits() };
+    }
+
+    const data = await response.json();
+    const remaining = Number(data.remaining) || 0;
+    setCredits(remaining);
+    return { ok: true, remaining };
+  } catch (e) {
+    console.error('Error consuming credits:', e);
+    return { ok: false, remaining: getCredits() };
+  }
 }
 
 export function creditsNeededPerImage(): number {
