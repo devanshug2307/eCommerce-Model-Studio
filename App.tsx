@@ -7,7 +7,6 @@ import Button from './components/Button';
 import Spinner from './components/Spinner';
 import { ModelOptions, GeneratedImage } from './types';
 import { generateImageBatch, generateImageVariation } from './services/geminiService';
-import BuyCredits from './components/BuyCredits';
 import { consumeCredits, creditsNeededPerImage, syncCredits } from './services/creditsService';
 
 // Icons for buttons
@@ -206,93 +205,160 @@ function App() {
   const isGenerateDisabled = !productImage || isLoading;
 
   return (
-    <div className="bg-gray-800 text-gray-100 min-h-screen font-sans">
+    <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-gray-100 min-h-screen font-sans">
       <Header />
-      <main className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
+      
+      {/* Background gradient orbs */}
+      <div className="fixed top-0 right-0 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl pointer-events-none"></div>
+      <div className="fixed bottom-0 left-0 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl pointer-events-none"></div>
+      
+      <main className="max-w-7xl mx-auto py-6 sm:py-8 px-4 sm:px-6 lg:px-8 relative">
+        {/* Page Header */}
+        <div className="mb-6 sm:mb-8 text-center">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2">
+            <span className="bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
+              Create Model Photos
+            </span>
+          </h1>
+          <p className="text-sm sm:text-base text-gray-400">Upload, customize, and generate professional model images with AI</p>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-12">
           
           {/* Left Panel: Controls */}
-          <div className="lg:col-span-1 flex flex-col space-y-8">
-            <ImageUploader onImageSelect={handleImageSelect} selectedImageUrl={productImageUrl} />
-            <OptionsPanel options={options} setOptions={setOptions} isDisabled={isLoading} />
-            <div className="sticky bottom-0 py-4 bg-gray-800/80 backdrop-blur-sm">
-                <Button 
-                    onClick={handleGenerateClick} 
-                    isLoading={isLoading} 
-                    disabled={isGenerateDisabled}
-                    className="w-full text-lg py-3"
-                    icon={<SparklesIcon className="h-5 w-5" />}
-                >
-                    Generate Model Photos
-                </Button>
-                {error && <p className="text-red-400 text-sm mt-3 text-center">{error}</p>}
+          <div className="lg:col-span-1 flex flex-col space-y-4 sm:space-y-6">
+            {/* Step 1 */}
+            <div className="relative">
+              <div className="absolute -left-2 sm:-left-3 top-0 w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-xs font-bold text-white">1</div>
+              <div className="pl-5 sm:pl-6">
+                <h3 className="text-xs sm:text-sm font-semibold text-gray-300 mb-2 sm:mb-3 uppercase tracking-wider">Upload Product</h3>
+                <ImageUploader onImageSelect={handleImageSelect} selectedImageUrl={productImageUrl} />
+              </div>
+            </div>
+
+            {/* Step 2 */}
+            <div className="relative">
+              <div className="absolute -left-2 sm:-left-3 top-0 w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-xs font-bold text-white">2</div>
+              <div className="pl-5 sm:pl-6">
+                <h3 className="text-xs sm:text-sm font-semibold text-gray-300 mb-2 sm:mb-3 uppercase tracking-wider">Customize Model</h3>
+                <OptionsPanel options={options} setOptions={setOptions} isDisabled={isLoading} />
+              </div>
+            </div>
+
+            {/* Step 3 - Generate Button */}
+            <div className="relative lg:sticky lg:bottom-4 pt-2 sm:pt-4">
+              <div className="absolute -left-2 sm:-left-3 top-2 sm:top-4 w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-xs font-bold text-white">3</div>
+              <div className="pl-5 sm:pl-6">
+                <h3 className="text-xs sm:text-sm font-semibold text-gray-300 mb-2 sm:mb-3 uppercase tracking-wider">Generate</h3>
+                <div className="bg-gray-900/60 backdrop-blur-sm border border-gray-700/50 rounded-xl p-3 sm:p-4">
+                  <Button 
+                      onClick={handleGenerateClick} 
+                      isLoading={isLoading} 
+                      disabled={isGenerateDisabled}
+                      className="w-full text-sm sm:text-base py-3 sm:py-3.5 shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40"
+                      icon={<SparklesIcon className="h-4 w-4 sm:h-5 sm:w-5" />}
+                  >
+                      Generate Photos
+                  </Button>
+                  {error && (
+                    <div className="mt-3 p-2.5 sm:p-3 bg-red-900/30 border border-red-700/50 rounded-lg">
+                      <p className="text-red-300 text-xs text-center">{error}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
 
           {/* Right Panel: Results */}
           <div className="lg:col-span-2">
-            <h3 className="text-lg font-semibold leading-6 text-gray-100 mb-1">
-              3. Generated Photos
-            </h3>
-            <p className="text-sm text-gray-400 mb-6">Review the generated images. Click the magic wand to generate a variation.</p>
+            <div className="mb-4 sm:mb-6">
+              <div className="flex items-center gap-2 sm:gap-3 mb-2">
+                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-xs sm:text-sm font-bold text-white">4</div>
+                <h3 className="text-lg sm:text-xl font-bold text-gray-100">
+                  Your Generated Photos
+                </h3>
+              </div>
+              <p className="text-xs sm:text-sm text-gray-400 ml-9 sm:ml-11">Review, edit, create variations, or download your AI-generated images</p>
+            </div>
 
             {isLoading && (
-              <div className="flex flex-col items-center justify-center h-96 bg-gray-900/50 rounded-lg">
-                <Spinner className="w-12 h-12 text-blue-400" />
-                <p className="mt-4 text-lg text-gray-300">Generating images...</p>
-                <p className="text-sm text-gray-500">This may take a moment.</p>
+              <div className="flex flex-col items-center justify-center h-96 bg-gray-900/40 backdrop-blur-sm border border-gray-700/50 rounded-2xl">
+                <div className="relative">
+                  <div className="absolute inset-0 bg-blue-500/20 rounded-full blur-2xl"></div>
+                  <Spinner className="w-16 h-16 text-blue-400 relative" />
+                </div>
+                <p className="mt-6 text-xl text-gray-200 font-semibold">Creating Magic...</p>
+                <p className="text-sm text-gray-500 mt-2">This may take 30-60 seconds</p>
               </div>
             )}
             
             {!isLoading && generatedImages.length === 0 && (
-              <div className="flex flex-col items-center justify-center h-96 bg-gray-900/50 border-2 border-dashed border-gray-600 rounded-lg">
-                <p className="text-lg text-gray-500">Your generated images will appear here.</p>
-                <p className="text-sm text-gray-600">Upload an image and set your options to get started.</p>
+              <div className="flex flex-col items-center justify-center h-64 sm:h-96 bg-gray-900/40 backdrop-blur-sm border-2 border-dashed border-gray-600/50 rounded-2xl p-6">
+                <div className="text-center max-w-md">
+                  <svg className="w-16 h-16 sm:w-20 sm:h-20 mx-auto text-gray-600 mb-3 sm:mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  <p className="text-lg sm:text-xl text-gray-400 font-medium mb-2">No images yet</p>
+                  <p className="text-xs sm:text-sm text-gray-500 px-4">Upload a product image, customize your settings, and hit generate to see the magic</p>
+                </div>
               </div>
             )}
 
             {!isLoading && generatedImages.length > 0 && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                 {generatedImages.map(image => (
-                  <div key={image.id} className={`group bg-gray-900 rounded-lg shadow-lg overflow-hidden flex flex-col ${image.parentId ? 'ml-6 border-l-2 border-blue-500/30' : ''}`}>
-                    <div className="relative overflow-hidden">
-                      <img src={image.src} alt={image.category} className="w-full h-auto object-cover aspect-[4/5] transition-transform duration-300 ease-in-out group-hover:scale-105" />
-                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-300"></div>
-                      <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/70 to-transparent">
-                        <h4 className="text-white text-lg font-bold truncate">{image.category}</h4>
+                  <div key={image.id} className={`group relative ${image.parentId ? 'ml-4 sm:ml-6' : ''}`}>
+                    {image.parentId && (
+                      <div className="absolute -left-4 sm:-left-6 top-0 bottom-0 w-0.5 bg-gradient-to-b from-blue-500/50 to-purple-500/50"></div>
+                    )}
+                    <div className="bg-gray-900/60 backdrop-blur-sm rounded-xl sm:rounded-2xl border border-gray-700/50 overflow-hidden shadow-xl hover:border-gray-600 transition-all duration-300 hover:shadow-2xl hover:shadow-blue-500/10">
+                      <div className="relative overflow-hidden">
+                        <img src={image.src} alt={image.category} className="w-full h-auto object-cover aspect-[4/5] transition-transform duration-500 ease-out group-hover:scale-105" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                        <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent">
+                          <h4 className="text-white text-base font-bold truncate flex items-center gap-2">
+                            {image.parentId && (
+                              <span className="text-blue-400 text-xs">↳</span>
+                            )}
+                            {image.category}
+                          </h4>
+                        </div>
                       </div>
-                    </div>
-                    <div className="p-2 bg-gray-800/50 flex items-center gap-2 border-t border-gray-700/50">
-                      {!image.parentId && (
+                      <div className="p-2 sm:p-3 bg-gray-800/50 flex items-center gap-1.5 sm:gap-2 border-t border-gray-700/50">
+                        {!image.parentId && (
+                          <Button
+                            variant="secondary"
+                            className="flex-1 text-[10px] sm:text-xs py-2 sm:py-2.5 hover:bg-gray-700"
+                            onClick={() => handleVariationClick(image)}
+                            isLoading={generatingVariationId === image.id}
+                            disabled={!!generatingVariationId}
+                            title="Generate a new variation"
+                            icon={<WandIcon className="h-3 w-3 sm:h-4 sm:w-4" />}
+                          >
+                            <span className="hidden xs:inline">Variation</span>
+                            <span className="xs:hidden">Var</span>
+                          </Button>
+                        )}
                         <Button
                           variant="secondary"
-                          className="flex-1 text-xs py-2"
-                          onClick={() => handleVariationClick(image)}
-                          isLoading={generatingVariationId === image.id}
-                          disabled={!!generatingVariationId}
-                          title="Generate a new variation"
-                          icon={<WandIcon className="h-4 w-4" />}
+                          className="flex-1 text-[10px] sm:text-xs py-2 sm:py-2.5 hover:bg-gray-700"
+                          onClick={() => handleEditClick(image)}
+                          title="Edit Image"
                         >
-                          Variation
+                          Edit
                         </Button>
-                      )}
-                      <Button
-                        variant="secondary"
-                        className="flex-1 text-xs py-2"
-                        onClick={() => handleEditClick(image)}
-                        title="Edit Image"
-                      >
-                        Edit
-                      </Button>
-                      <Button
-                        variant="secondary"
-                        className="flex-1 text-xs py-2"
-                        onClick={() => handleDownloadClick(image.src, image.category)}
-                        title="Download Image"
-                        icon={<DownloadIcon className="h-4 w-4" />}
-                      >
-                        Download
-                      </Button>
+                        <Button
+                          variant="secondary"
+                          className="flex-1 text-[10px] sm:text-xs py-2 sm:py-2.5 hover:bg-gray-700"
+                          onClick={() => handleDownloadClick(image.src, image.category)}
+                          title="Download Image"
+                          icon={<DownloadIcon className="h-3 w-3 sm:h-4 sm:w-4" />}
+                        >
+                          <span className="hidden xs:inline">Download</span>
+                          <span className="xs:hidden">Save</span>
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -301,10 +367,28 @@ function App() {
 
           </div>
         </div>
+
+        {/* Info Banner */}
+        {generatedImages.length > 0 && (
+          <div className="mt-8 sm:mt-12 max-w-4xl mx-auto">
+            <div className="bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-pink-500/10 border border-blue-500/20 rounded-xl sm:rounded-2xl p-4 sm:p-6 text-center">
+              <p className="text-gray-300 text-xs sm:text-sm">
+                🎉 <span className="font-semibold">Great work!</span> Need more credits? 
+                <button 
+                  onClick={() => {
+                    window.history.pushState({}, '', '/upgrade');
+                    window.dispatchEvent(new PopStateEvent('popstate'));
+                  }}
+                  className="ml-1 sm:ml-2 text-blue-400 hover:text-blue-300 underline font-semibold"
+                >
+                  Check out our pricing
+                </button>
+              </p>
+            </div>
+          </div>
+        )}
       </main>
-      <section id="buy-credits-panel" className="max-w-7xl mx-auto pb-12 px-4 sm:px-6 lg:px-8">
-        <BuyCredits />
-      </section>
+
       <ImageEditorModal
         open={!!editorOpen}
         src={editorSrc}
