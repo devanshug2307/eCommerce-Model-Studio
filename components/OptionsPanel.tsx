@@ -44,6 +44,7 @@ const OptionsPanel: React.FC<OptionsPanelProps> = ({ options, setOptions, isDisa
   const ethnicityOptions: ModelOptions['ethnicity'][] = ['Asian', 'Black', 'Caucasian', 'Hispanic', 'Indian', 'Middle Eastern'];
   const ageOptions: ModelOptions['age'][] = ['Young Adult (18-25)', 'Adult (25-40)', 'Teenager (13-17)', 'Child (3-7)'];
   const backgroundOptions: ModelOptions['background'][] = ['Studio White', 'Studio Gray', 'Outdoor Urban', 'Outdoor Nature'];
+  const imageCountOptions: number[] = [1, 2, 3, 4, 5, 6];
 
   return (
     <div className="w-full">
@@ -54,10 +55,23 @@ const OptionsPanel: React.FC<OptionsPanelProps> = ({ options, setOptions, isDisa
       
       <div className="space-y-6">
         <div>
+          <label className="block text-sm font-medium text-gray-300 mb-2">Images to Generate</label>
+          <div className="flex flex-wrap gap-2">
+            {imageCountOptions.map(c => (
+              <span key={c}>
+                <OptionButton label={`${c}`} isSelected={(options.imagesCount || 3) === c} onClick={() => handleOptionChange('imagesCount', c as any)} disabled={isDisabled} />
+              </span>
+            ))}
+          </div>
+          <p className="text-xs text-gray-500 mt-1">Each image costs 10 credits. Choose fewer images to save credits.</p>
+        </div>
+        <div>
           <label className="block text-sm font-medium text-gray-300 mb-2">Gender</label>
           <div className="flex flex-wrap gap-2">
             {genderOptions.map(gender => (
-              <OptionButton key={gender} label={gender} isSelected={options.gender === gender} onClick={() => handleOptionChange('gender', gender)} disabled={isDisabled} />
+              <span key={gender}>
+                <OptionButton label={gender} isSelected={options.gender === gender} onClick={() => handleOptionChange('gender', gender)} disabled={isDisabled} />
+              </span>
             ))}
           </div>
         </div>
@@ -65,7 +79,9 @@ const OptionsPanel: React.FC<OptionsPanelProps> = ({ options, setOptions, isDisa
           <label className="block text-sm font-medium text-gray-300 mb-2">Ethnicity</label>
           <div className="flex flex-wrap gap-2">
             {ethnicityOptions.map(ethnicity => (
-              <OptionButton key={ethnicity} label={ethnicity} isSelected={options.ethnicity === ethnicity} onClick={() => handleOptionChange('ethnicity', ethnicity)} disabled={isDisabled} />
+              <span key={ethnicity}>
+                <OptionButton label={ethnicity} isSelected={options.ethnicity === ethnicity} onClick={() => handleOptionChange('ethnicity', ethnicity)} disabled={isDisabled} />
+              </span>
             ))}
           </div>
         </div>
@@ -73,7 +89,9 @@ const OptionsPanel: React.FC<OptionsPanelProps> = ({ options, setOptions, isDisa
           <label className="block text-sm font-medium text-gray-300 mb-2">Age Group</label>
           <div className="flex flex-wrap gap-2">
             {ageOptions.map(age => (
-              <OptionButton key={age} label={age} isSelected={options.age === age} onClick={() => handleOptionChange('age', age)} disabled={isDisabled} />
+              <span key={age}>
+                <OptionButton label={age} isSelected={options.age === age} onClick={() => handleOptionChange('age', age)} disabled={isDisabled} />
+              </span>
             ))}
           </div>
         </div>

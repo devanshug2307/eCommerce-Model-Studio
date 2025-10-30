@@ -64,7 +64,8 @@ The result must be photorealistic, professional, and free of any text or waterma
 
 export const generateImageBatch = async (
   productImage: File,
-  options: ModelOptions
+  options: ModelOptions,
+  count: number = 6
 ): Promise<{ src: string, category: string }[]> => {
   const apiKey = process.env.API_KEY || import.meta.env.VITE_API_KEY;
   if (!apiKey) {
@@ -79,7 +80,9 @@ export const generateImageBatch = async (
     'Flat Lay', 'Hanger Shot'
   ];
 
-  const generationPromises = shotCategories.map(async (category) => {
+  const selectedCategories = shotCategories.slice(0, Math.max(1, Math.min(count, shotCategories.length)));
+
+  const generationPromises = selectedCategories.map(async (category) => {
     const textPart = { text: buildPromptForCategory(options, category) };
     // FIX: The original ternary operator was redundant as both branches were identical.
     // Simplified to always include both image and text parts, which is correct for all categories.

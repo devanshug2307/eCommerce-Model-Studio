@@ -37,6 +37,7 @@ function App() {
     age: 'Young Adult (18-25)',
     ethnicity: 'Caucasian',
     background: 'Studio White',
+    imagesCount: 3,
   });
   const [generatedImages, setGeneratedImages] = useState<GeneratedImage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -76,7 +77,8 @@ function App() {
       setError('Please upload a product image first.');
       return;
     }
-    const need = creditsNeededPerImage();
+    const imagesCount = options.imagesCount || 3;
+    const need = creditsNeededPerImage() * imagesCount;
     const use = await consumeCredits(need);
     if (!use.ok) {
       setError(use.error || `Not enough credits. You need ${need} credits per batch.`);
@@ -87,7 +89,7 @@ function App() {
     setGeneratedImages([]);
 
     try {
-      const results = await generateImageBatch(productImage, options);
+      const results = await generateImageBatch(productImage, options, imagesCount);
       const newImages: GeneratedImage[] = results.map((result, index) => ({
         id: `base-${Date.now()}-${index}`,
         src: result.src,

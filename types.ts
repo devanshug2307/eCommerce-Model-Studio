@@ -3,6 +3,7 @@ export interface ModelOptions {
   age: 'Young Adult (18-25)' | 'Adult (25-40)' | 'Teenager (13-17)' | 'Child (3-7)';
   ethnicity: 'Asian' | 'Black' | 'Caucasian' | 'Hispanic' | 'Indian' | 'Middle Eastern';
   background: 'Studio White' | 'Studio Gray' | 'Outdoor Urban' | 'Outdoor Nature';
+  imagesCount?: number; // number of images to generate in a batch
 }
 
 export type GeneratedImage = {
