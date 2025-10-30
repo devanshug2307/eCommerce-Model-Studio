@@ -63,10 +63,39 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     const data = await response.json();
-    
-    // If user doesn't exist in database, return 0 credits
-    const credits = data.length > 0 ? data[0].credits : 0;
 
+    // If user doesn't exist in database, create a row with 0 credits so they appear immediately
+    if (!Array.isArray(data) || data.length === 0) {
+      try {
+        const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY;
+        if (SERVICE_ROLE_KEY) {
+          const upsertResp = await fetch(`${SUPABASE_URL}/rest/v1/user_credits`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Prefer': 'resolution=merge-duplicates',
+              'apikey': SERVICE_ROLE_KEY,
+              'Authorization': `Bearer ${SERVICE_ROLE_KEY}`,
+            },
+            body: JSON.stringify({ user_id: userId, credits: 0 }),
+          });
+          // Non-fatal if this fails; we still return 0
+          if (!upsertResp.ok) {
+            const t = await upsertResp.text();
+            console.warn('Failed to upsert user_credits row:', t);
+          }
+        } else {
+          console.warn('No service role key set. Skipping creation of user_credits row.');
+        }
+      } catch (e) {
+        console.warn('Error creating user_credits row:', e);
+      }
+
+      return res.status(200).json({ credits: 0, userId });
+    }
+
+    // Existing user row
+    const credits = data[0].credits || 0;
     return res.status(200).json({ credits, userId });
   } catch (e: any) {
     console.error('Error fetching credits:', e);
