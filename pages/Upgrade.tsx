@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import Header from '../components/Header';
 import Button from '../components/Button';
 import AuthModal from '../components/AuthModal';
+import Testimonial from '../components/Testimonial';
+import FAQAccordion from '../components/FAQ';
+import Footer from '../components/Footer';
 import { useAuth } from '../contexts/AuthContext';
 import { CreditPack, startCheckout } from '../services/creditsService';
 
@@ -61,6 +64,34 @@ const UpgradePage: React.FC = () => {
   const [authOpen, setAuthOpen] = useState(false);
   const [pendingPack, setPendingPack] = useState<CreditPack | null>(null);
   const { user } = useAuth();
+
+  // FAQ data for pricing
+  const pricingFaqItems = [
+    {
+      question: "How does the credit system work?",
+      answer: "Each image generation costs 10 credits. When you purchase a pack, you get credits that never expire. For example, the 100 credit pack lets you generate 10 images, the 200 credit pack lets you generate 20 images, and so on."
+    },
+    {
+      question: "Do credits expire?",
+      answer: "No! Your credits never expire. Use them whenever you want, at your own pace. There's no time pressure or subscription to worry about."
+    },
+    {
+      question: "Can I upgrade or buy more credits later?",
+      answer: "Absolutely! You can purchase additional credit packs anytime. Your new credits will be added to your existing balance."
+    },
+    {
+      question: "What payment methods do you accept?",
+      answer: "We accept all major payment methods including credit cards, debit cards, UPI, and net banking through our secure payment gateway."
+    },
+    {
+      question: "Is there a refund policy?",
+      answer: "Yes! We offer a 7-day money-back guarantee. If you're not satisfied with your first purchase, contact us for a full refund, no questions asked."
+    },
+    {
+      question: "Can I use credits for variations and edits?",
+      answer: "Generating variations costs 10 credits per image. However, editing existing images using our built-in editor is completely free!"
+    }
+  ];
 
   const onBuy = async (pack: CreditPack) => {
     if (!user) {
@@ -251,8 +282,143 @@ const UpgradePage: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {/* ROI Calculator Section */}
+        <div className="mt-16 sm:mt-24 max-w-4xl mx-auto">
+          <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 border border-blue-500/20 rounded-2xl p-8 sm:p-10">
+            <h3 className="text-2xl sm:text-3xl font-bold text-center mb-6">
+              <span className="bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
+                Calculate Your Savings
+              </span>
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
+              <div className="text-center">
+                <div className="text-red-400 text-sm font-semibold mb-2">Traditional Photoshoot</div>
+                <div className="text-4xl sm:text-5xl font-bold text-white mb-2">₹25,000</div>
+                <div className="text-gray-400 text-sm">
+                  Average cost for 10 professional model photos
+                </div>
+              </div>
+              <div className="text-center">
+                <div className="text-green-400 text-sm font-semibold mb-2">AI Model Studio</div>
+                <div className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-green-400 to-blue-400 bg-clip-text text-transparent mb-2">₹99</div>
+                <div className="text-gray-400 text-sm">
+                  Trial pack - 10 AI-generated photos
+                </div>
+              </div>
+            </div>
+            <div className="text-center py-4 bg-green-500/10 border border-green-500/20 rounded-xl">
+              <div className="text-2xl sm:text-3xl font-bold text-green-400 mb-1">Save ₹24,901</div>
+              <div className="text-gray-400 text-sm">That's 99.6% cost savings!</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Testimonials Section */}
+        <div className="mt-16 sm:mt-24">
+          <div className="text-center mb-12">
+            <h3 className="text-2xl sm:text-3xl font-bold mb-4">
+              <span className="bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
+                Trusted by Businesses Like Yours
+              </span>
+            </h3>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <Testimonial
+              quote="Best investment I made for my business! The Premium pack paid for itself with just one order. My product photos look incredibly professional now."
+              author="Vikram Singh"
+              role="Owner"
+              company="The Denim Store"
+              rating={5}
+            />
+            <Testimonial
+              quote="Started with the Trial pack and immediately upgraded to Premium Plus. The quality is outstanding and my customers love the professional look."
+              author="Sneha Patel"
+              role="Founder"
+              company="Ethnic Elegance"
+              rating={5}
+            />
+            <Testimonial
+              quote="This tool is incredible value for money. What used to cost me ₹30,000 per photoshoot now costs just ₹199. Game changer!"
+              author="Arjun Kapoor"
+              role="Creative Director"
+              company="Modern Wardrobe"
+              rating={5}
+            />
+          </div>
+        </div>
+
+        {/* Comparison Table */}
+        <div className="mt-16 sm:mt-24 max-w-5xl mx-auto">
+          <div className="text-center mb-12">
+            <h3 className="text-2xl sm:text-3xl font-bold mb-4">
+              <span className="bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
+                Compare Plans
+              </span>
+            </h3>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="border-b border-gray-700">
+                  <th className="p-4 text-left text-gray-300 font-semibold">Features</th>
+                  <th className="p-4 text-center text-gray-300 font-semibold">Trial</th>
+                  <th className="p-4 text-center text-gray-300 font-semibold bg-blue-500/5">Premium</th>
+                  <th className="p-4 text-center text-gray-300 font-semibold">Premium Plus</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  { feature: 'Credits', values: ['100', '200', '300'] },
+                  { feature: 'Images', values: ['10', '20', '30'] },
+                  { feature: 'Price per Image', values: ['₹9.9', '₹9.95', '₹9.97'] },
+                  { feature: 'Processing Speed', values: ['Standard', 'Fast', 'Fast'] },
+                  { feature: 'New Features Access', values: ['❌', '✅', '✅'] },
+                  { feature: 'Priority Support', values: ['❌', '✅', '✅'] },
+                  { feature: 'Early Access', values: ['❌', '❌', '✅'] }
+                ].map((row, idx) => (
+                  <tr key={idx} className="border-b border-gray-800 hover:bg-gray-800/30">
+                    <td className="p-4 text-gray-300">{row.feature}</td>
+                    <td className="p-4 text-center text-gray-400">{row.values[0]}</td>
+                    <td className="p-4 text-center text-white bg-blue-500/5">{row.values[1]}</td>
+                    <td className="p-4 text-center text-gray-400">{row.values[2]}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* FAQ Section */}
+        <div className="mt-16 sm:mt-24 max-w-3xl mx-auto">
+          <div className="text-center mb-12">
+            <h3 className="text-2xl sm:text-3xl font-bold mb-4">
+              <span className="bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
+                Pricing Questions?
+              </span>
+            </h3>
+          </div>
+          <FAQAccordion items={pricingFaqItems} />
+        </div>
+
+        {/* Money-back Guarantee Banner */}
+        <div className="mt-16 sm:mt-20 max-w-4xl mx-auto">
+          <div className="bg-gradient-to-r from-green-500/10 via-blue-500/10 to-purple-500/10 border border-green-500/20 rounded-2xl p-8 sm:p-10 text-center">
+            <div className="w-16 h-16 mx-auto mb-4 bg-green-500/20 rounded-full flex items-center justify-center">
+              <svg className="w-8 h-8 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <h3 className="text-2xl font-bold text-white mb-3">7-Day Money-Back Guarantee</h3>
+            <p className="text-gray-300 max-w-2xl mx-auto">
+              We're confident you'll love our AI model studio. If you're not completely satisfied with your first purchase,
+              we'll refund your money within 7 days—no questions asked.
+            </p>
+          </div>
+        </div>
       </main>
-      
+
+      <Footer />
       <AuthModal isOpen={authOpen} onClose={() => setAuthOpen(false)} initialMode="login" />
     </div>
   );

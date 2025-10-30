@@ -46,28 +46,51 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageSelect, selectedIm
 
   return (
     <div className="w-full">
-      <h3 className="text-lg font-semibold leading-6 text-gray-100 mb-1">
-        1. Upload Product
-      </h3>
-      <p className="text-sm text-gray-400 mb-4">Upload or drag and drop your product image.</p>
-      
-      <div 
-        className={`mt-1 flex justify-center items-center px-6 pt-5 pb-6 border-2 border-dashed rounded-lg cursor-pointer transition-colors duration-200 ${isDragging ? 'border-blue-500 bg-gray-700/50' : 'border-gray-600 hover:border-blue-500'}`}
+      <div
+        className={`relative mt-1 flex justify-center items-center px-6 pt-5 pb-6 border-2 border-dashed rounded-xl cursor-pointer transition-all duration-300 ${
+          isDragging
+            ? 'border-blue-500 bg-blue-500/10 scale-[1.02]'
+            : selectedImageUrl
+            ? 'border-gray-600 bg-gray-800/40 hover:border-gray-500'
+            : 'border-gray-600 bg-gray-900/40 hover:border-blue-500 hover:bg-gray-800/40'
+        }`}
         onClick={() => fileInputRef.current?.click()}
         onDrop={handleDrop}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
       >
-        <div className="space-y-1 text-center w-full">
+        <div className="space-y-3 text-center w-full">
           {selectedImageUrl ? (
-            <img src={selectedImageUrl} alt="Product preview" className="mx-auto h-48 w-auto rounded-md object-contain" />
+            <div className="relative group">
+              <img
+                src={selectedImageUrl}
+                alt="Product preview"
+                className="mx-auto h-48 w-auto rounded-lg object-contain border border-gray-700/50"
+              />
+              <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded-lg flex items-center justify-center">
+                <div className="text-white text-sm font-medium flex items-center gap-2">
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                  </svg>
+                  Change Image
+                </div>
+              </div>
+            </div>
           ) : (
             <>
-              <UploadIcon className="mx-auto h-12 w-12 text-gray-500" />
-              <div className="flex text-sm text-gray-400">
-                <p className="pl-1">Click to upload, or drag and drop</p>
+              <div className="mx-auto w-16 h-16 rounded-xl bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center">
+                <UploadIcon className="h-8 w-8 text-blue-400" />
               </div>
-              <p className="text-xs text-gray-500">PNG, JPG up to 10MB</p>
+              <div>
+                <p className="text-sm text-gray-300 font-medium">Click to upload or drag and drop</p>
+                <p className="text-xs text-gray-500 mt-1">PNG, JPG, WEBP up to 10MB</p>
+              </div>
+              <div className="flex items-center justify-center gap-2 text-xs text-gray-500">
+                <svg className="w-4 h-4 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+                Best results with clear product photos
+              </div>
             </>
           )}
         </div>
