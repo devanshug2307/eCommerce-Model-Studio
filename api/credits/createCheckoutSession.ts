@@ -4,7 +4,6 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 type CreditPack = 100 | 200 | 300;
 
 interface CreateCheckoutBody {
-  userId: string; // your app user id
   pack: CreditPack;
 }
 
@@ -12,7 +11,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Set CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
   // Handle CORS preflight request
   if (req.method === 'OPTIONS') {
@@ -26,10 +25,34 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     console.log('Received checkout request:', { body: req.body, method: req.method });
     
-    const { userId, pack } = req.body as CreateCheckoutBody;
-    if (!userId || !pack) {
-      console.error('Missing required fields:', { userId, pack });
-      return res.status(400).json({ error: 'Missing userId or pack' });
+    // Validate Supabase access token and derive userId
+    const SUPABASE_URL = process.env.SUPABASE_URL || 'https://lkfdimrlbctlughzocis.supabase.co';
+    const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || '';
+    const authHeader = req.headers.authorization || '';
+    const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
+    if (!token) {
+      return res.status(401).json({ error: 'Missing Authorization header' });
+    }
+    const userResp = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+      method: 'GET',
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+    if (!userResp.ok) {
+      return res.status(401).json({ error: 'Invalid or expired token' });
+    }
+    const userData = await userResp.json();
+    const userId: string | undefined = userData?.id;
+    if (!userId) {
+      return res.status(401).json({ error: 'Invalid session' });
+    }
+
+    const { pack } = req.body as CreateCheckoutBody;
+    if (!pack) {
+      console.error('Missing required fields:', { pack });
+      return res.status(400).json({ error: 'Missing pack' });
     }
 
     // Map credit pack to product IDs created in Dodo Payments

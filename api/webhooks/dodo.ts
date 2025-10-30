@@ -7,7 +7,7 @@ type CreditPack = 100 | 200 | 300;
 
 // Get Supabase credentials from environment
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://lkfdimrlbctlughzocis.supabase.co';
-const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxrZmRpbXJsYmN0bHVnaHpvY2lzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE3NDg1NjIsImV4cCI6MjA3NzMyNDU2Mn0.utPah48Z1sXzTEE_ngYe3RGOQvbCS84KxyjE75CtOKg';
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY;
 
 // Add credits to user using Supabase database
 async function addCreditsToUser(userId: string, credits: number): Promise<void> {
@@ -17,8 +17,8 @@ async function addCreditsToUser(userId: string, credits: number): Promise<void> 
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'apikey': SUPABASE_ANON_KEY,
-        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        'apikey': SUPABASE_SERVICE_ROLE_KEY || '',
+        'Authorization': `Bearer ${SUPABASE_SERVICE_ROLE_KEY || ''}`,
       },
       body: JSON.stringify({
         p_user_id: userId,
@@ -46,8 +46,8 @@ async function deductCreditsFromUser(userId: string, credits: number): Promise<v
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'apikey': SUPABASE_ANON_KEY,
-        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        'apikey': SUPABASE_SERVICE_ROLE_KEY || '',
+        'Authorization': `Bearer ${SUPABASE_SERVICE_ROLE_KEY || ''}`,
       },
       body: JSON.stringify({
         p_user_id: userId,

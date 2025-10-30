@@ -1,6 +1,6 @@
 // Vercel Serverless Function to deduct user credits in Supabase
 // POST /api/credits/use
-// body: { userId: string, amount: number }
+// body: { amount: number }
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
@@ -12,24 +12,50 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   // CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method Not Allowed' });
 
   try {
-    const { userId, amount } = (req.body || {}) as { userId?: string; amount?: number };
-    if (!userId || !amount || amount <= 0) {
-      return res.status(400).json({ error: 'Missing or invalid userId/amount' });
+    // Validate Supabase access token
+    const authHeader = req.headers.authorization || '';
+    const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
+    if (!token) {
+      return res.status(401).json({ error: 'Missing Authorization header' });
+    }
+
+    // Derive user from token via Supabase Auth API
+    const userResp = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+      method: 'GET',
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+    if (!userResp.ok) {
+      return res.status(401).json({ error: 'Invalid or expired token' });
+    }
+    const userData = await userResp.json();
+    const userId: string | undefined = userData?.id;
+    if (!userId) {
+      return res.status(401).json({ error: 'Invalid session' });
+    }
+
+    const { amount } = (req.body || {}) as { amount?: number };
+    if (!amount || amount <= 0) {
+      return res.status(400).json({ error: 'Missing or invalid amount' });
     }
 
     // Call Supabase RPC to deduct credits atomically
+    // Use service role key for server-side mutation
+    const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY;
     const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/deduct_user_credits`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'apikey': SUPABASE_ANON_KEY,
-        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        'apikey': SERVICE_ROLE_KEY || SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${SERVICE_ROLE_KEY || SUPABASE_ANON_KEY}`,
       },
       body: JSON.stringify({ p_user_id: userId, p_credits: amount }),
     });

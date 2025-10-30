@@ -1,5 +1,6 @@
 // Vercel Serverless Function to get user credits from Supabase
-// GET /api/credits/get?userId=xxx
+// GET /api/credits/get
+// Requires Authorization: Bearer <supabase access_token>
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
@@ -11,7 +12,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Set CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
   // Handle CORS preflight request
   if (req.method === 'OPTIONS') {
@@ -23,10 +24,28 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    const { userId } = req.query || {};
-    
+    // Validate Supabase access token
+    const authHeader = req.headers.authorization || '';
+    const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
+    if (!token) {
+      return res.status(401).json({ error: 'Missing Authorization header' });
+    }
+
+    // Derive user from token via Supabase Auth API
+    const userResp = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+      method: 'GET',
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+    if (!userResp.ok) {
+      return res.status(401).json({ error: 'Invalid or expired token' });
+    }
+    const userData = await userResp.json();
+    const userId: string | undefined = userData?.id;
     if (!userId) {
-      return res.status(400).json({ error: 'Missing userId query parameter' });
+      return res.status(401).json({ error: 'Invalid session' });
     }
 
     // Fetch user credits from Supabase

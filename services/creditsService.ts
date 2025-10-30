@@ -15,6 +15,15 @@ export async function getUserId(): Promise<string | null> {
   }
 }
 
+async function getAccessToken(): Promise<string | null> {
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    return session?.access_token ?? null;
+  } catch {
+    return null;
+  }
+}
+
 // Get credits from localStorage (cached)
 export function getCredits(): number {
   const stored = localStorage.getItem(STORAGE_KEY);
@@ -38,13 +47,15 @@ export async function fetchCreditsFromDatabase(): Promise<number> {
   }
 
   try {
-    const userId = await getUserId();
-    if (!userId) {
-      console.warn('No user ID available. Using cached credits.');
+    const token = await getAccessToken();
+    if (!token) {
+      console.warn('No access token. Using cached credits.');
       return getCredits();
     }
     
-    const response = await fetch(`${apiUrl}/api/credits/get?userId=${encodeURIComponent(userId)}`);
+    const response = await fetch(`${apiUrl}/api/credits/get`, {
+      headers: { 'Authorization': `Bearer ${token}` },
+    });
     
     if (!response.ok) {
       throw new Error('Failed to fetch credits');
@@ -89,15 +100,15 @@ export async function consumeCredits(amount: number): Promise<{ ok: boolean; rem
   }
 
   try {
-    const userId = await getUserId();
-    if (!userId) {
+    const token = await getAccessToken();
+    if (!token) {
       return { ok: false, remaining: getCredits() };
     }
 
     const response = await fetch(`${apiUrl}/api/credits/use`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId, amount }),
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      body: JSON.stringify({ amount }),
     });
 
     if (!response.ok) {
@@ -135,9 +146,8 @@ export async function startCheckout(pack: CreditPack): Promise<{ url: string }> 
   }
 
   try {
-    const userId = await getUserId();
-    
-    if (!userId) {
+    const token = await getAccessToken();
+    if (!token) {
       throw new Error('You must be signed in to purchase credits.');
     }
 
@@ -145,9 +155,9 @@ export async function startCheckout(pack: CreditPack): Promise<{ url: string }> 
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
       },
       body: JSON.stringify({
-        userId,
         pack,
       }),
     });
