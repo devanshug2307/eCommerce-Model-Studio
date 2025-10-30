@@ -62,10 +62,24 @@ The goal is a new, unique image that is consistent with the original's quality a
 The result must be photorealistic, professional, and free of any text or watermarks.`;
 };
 
+const buildTryOnPrompt = (background: string, category: string): string => {
+  let backgroundDescription = '';
+  switch (background) {
+    case 'Studio White': backgroundDescription = 'Use a clean studio look with a plain white background.'; break;
+    case 'Studio Gray': backgroundDescription = 'Use a clean studio look with a plain neutral gray background.'; break;
+    case 'Outdoor Urban': backgroundDescription = 'Keep the background neutral and non-distracting; prioritize person realism.'; break;
+    case 'Outdoor Nature': backgroundDescription = 'Keep the background neutral and non-distracting; prioritize person realism.'; break;
+  }
+  const common = 'Do not change the person’s identity, face, hairstyle, skin tone, body shape, pose, or camera framing. Align the garment naturally with correct perspective, realistic fabric drape, occlusions (hands/hair), and lighting/shadows. No logos, text, or watermarks.';
+  const shot = category || 'Try-on';
+  return `Virtual try-on task. The first image is the PERSON photo. The second image is the GARMENT/Product photo. Put the garment from the second image onto the same person from the first image in a realistic way. ${common} ${backgroundDescription} Output: one photorealistic ${shot} result.`;
+};
+
 export const generateImageBatch = async (
   productImage: File,
   options: ModelOptions,
-  count: number = 6
+  count: number = 6,
+  personImage?: File
 ): Promise<{ src: string, category: string }[]> => {
   const apiKey = process.env.API_KEY || import.meta.env.VITE_API_KEY;
   if (!apiKey) {
@@ -73,7 +87,8 @@ export const generateImageBatch = async (
   }
 
   const ai = new GoogleGenAI({ apiKey });
-  const imagePart = await fileToGenerativePart(productImage);
+  const productPart = await fileToGenerativePart(productImage);
+  const personPart = personImage ? await fileToGenerativePart(personImage) : undefined;
   
   const shotCategories = [
     'Standing Pose', 'Action Pose', 'Detail Shot', 'Aesthetic Shot', 
@@ -83,10 +98,12 @@ export const generateImageBatch = async (
   const selectedCategories = shotCategories.slice(0, Math.max(1, Math.min(count, shotCategories.length)));
 
   const generationPromises = selectedCategories.map(async (category) => {
-    const textPart = { text: buildPromptForCategory(options, category) };
-    // FIX: The original ternary operator was redundant as both branches were identical.
-    // Simplified to always include both image and text parts, which is correct for all categories.
-    const parts = [imagePart, textPart];
+    const textPart = { text: personPart
+      ? buildTryOnPrompt(options.background, category)
+      : buildPromptForCategory(options, category)
+    };
+    // For try-on: first part is PERSON, second is GARMENT; text describes this mapping
+    const parts = personPart ? [personPart, productPart, textPart] : [productPart, textPart];
     
     try {
       const response = await ai.models.generateContent({

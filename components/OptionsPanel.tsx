@@ -5,6 +5,7 @@ interface OptionsPanelProps {
   options: ModelOptions;
   setOptions: React.Dispatch<React.SetStateAction<ModelOptions>>;
   isDisabled: boolean;
+  hideModelAttributes?: boolean; // hides gender/age/ethnicity when true
 }
 
 const OptionButton = ({ label, isSelected, onClick, disabled }: { label: string, isSelected: boolean, onClick: () => void, disabled: boolean }) => (
@@ -47,7 +48,7 @@ const BackgroundOption = ({ label, style, isSelected, onClick, disabled }: { lab
 );
 
 
-const OptionsPanel: React.FC<OptionsPanelProps> = ({ options, setOptions, isDisabled }) => {
+const OptionsPanel: React.FC<OptionsPanelProps> = ({ options, setOptions, isDisabled, hideModelAttributes }) => {
   const handleOptionChange = <K extends keyof ModelOptions>(
     key: K,
     value: ModelOptions[K]
@@ -86,6 +87,7 @@ const OptionsPanel: React.FC<OptionsPanelProps> = ({ options, setOptions, isDisa
             Each image costs 10 credits
           </p>
         </div>
+        {!hideModelAttributes && (
         <div>
           <label className="block text-sm font-medium text-gray-300 mb-3 flex items-center gap-2">
             <svg className="w-4 h-4 text-purple-400" fill="currentColor" viewBox="0 0 20 20">
@@ -101,6 +103,8 @@ const OptionsPanel: React.FC<OptionsPanelProps> = ({ options, setOptions, isDisa
             ))}
           </div>
         </div>
+        )}
+        {!hideModelAttributes && (
         <div>
           <label className="block text-sm font-medium text-gray-300 mb-3 flex items-center gap-2">
             <svg className="w-4 h-4 text-pink-400" fill="currentColor" viewBox="0 0 20 20">
@@ -116,6 +120,8 @@ const OptionsPanel: React.FC<OptionsPanelProps> = ({ options, setOptions, isDisa
             ))}
           </div>
         </div>
+        )}
+        {!hideModelAttributes && (
         <div>
           <label className="block text-sm font-medium text-gray-300 mb-3 flex items-center gap-2">
             <svg className="w-4 h-4 text-green-400" fill="currentColor" viewBox="0 0 20 20">
@@ -131,6 +137,7 @@ const OptionsPanel: React.FC<OptionsPanelProps> = ({ options, setOptions, isDisa
             ))}
           </div>
         </div>
+        )}
         <div>
             <label className="block text-sm font-medium text-gray-300 mb-3 flex items-center gap-2">
               <svg className="w-4 h-4 text-orange-400" fill="currentColor" viewBox="0 0 20 20">

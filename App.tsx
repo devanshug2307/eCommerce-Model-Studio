@@ -47,6 +47,9 @@ function App() {
   const [editorTargetId, setEditorTargetId] = useState<string | null>(null);
   const [editorSrc, setEditorSrc] = useState<string | null>(null);
   const [editorOpen, setEditorOpen] = useState<boolean>(false);
+  const [usePersonPhoto, setUsePersonPhoto] = useState<boolean>(false);
+  const [personImage, setPersonImage] = useState<File | null>(null);
+  const [personImageUrl, setPersonImageUrl] = useState<string | null>(null);
 
   // Sync credits from database on mount and after payment
   useEffect(() => {
@@ -75,6 +78,14 @@ function App() {
     setGeneratedImages([]);
     setError(null);
   }, [productImageUrl]);
+
+  const handlePersonSelect = useCallback((file: File) => {
+    setPersonImage(file);
+    if (personImageUrl) {
+      URL.revokeObjectURL(personImageUrl);
+    }
+    setPersonImageUrl(URL.createObjectURL(file));
+  }, [personImageUrl]);
 
   const applyEditedOutputReplace = async (dataUrl: string) => {
     try {
@@ -140,7 +151,12 @@ function App() {
     setGeneratedImages([]);
 
     try {
-      const results = await generateImageBatch(productImage, options, imagesCount);
+      const results = await generateImageBatch(
+        productImage,
+        options,
+        imagesCount,
+        usePersonPhoto && personImage ? personImage : undefined
+      );
       const newImages: GeneratedImage[] = results.map((result, index) => ({
         id: `base-${Date.now()}-${index}`,
         src: result.src,
@@ -153,11 +169,9 @@ function App() {
         await Promise.all(
           newImages.map(async (img) => {
             await uploadToGallery(img.src, {
-              gender: options.gender,
-              age: options.age,
-              ethnicity: options.ethnicity,
               background: options.background,
               category: img.category,
+              ...(usePersonPhoto ? {} : { gender: options.gender, age: options.age, ethnicity: options.ethnicity })
             });
           })
         );
@@ -262,18 +276,40 @@ function App() {
               </div>
             </div>
 
-            {/* Step 2 */}
+            {/* Optional Person Photo */}
             <div className="relative">
               <div className="absolute -left-2 sm:-left-3 top-0 w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-xs font-bold text-white">2</div>
               <div className="pl-5 sm:pl-6">
-                <h3 className="text-xs sm:text-sm font-semibold text-gray-300 mb-2 sm:mb-3 uppercase tracking-wider">Customize Model</h3>
-                <OptionsPanel options={options} setOptions={setOptions} isDisabled={isLoading} />
+                <div className="flex items-center justify-between mb-2 sm:mb-3">
+                  <h3 className="text-xs sm:text-sm font-semibold text-gray-300 uppercase tracking-wider">Use My Photo (Optional)</h3>
+                  <button
+                    onClick={() => setUsePersonPhoto(v => !v)}
+                    className={`px-2.5 py-1 text-[11px] rounded-md border ${usePersonPhoto ? 'bg-blue-600 border-blue-500 text-white' : 'bg-gray-800 border-gray-700 text-gray-300'}`}
+                  >
+                    {usePersonPhoto ? 'Enabled' : 'Disabled'}
+                  </button>
+                </div>
+                {usePersonPhoto && (
+                  <>
+                    <p className="text-[11px] text-gray-500 mb-2">Upload a clear, front-facing photo for best results.</p>
+                    <ImageUploader onImageSelect={handlePersonSelect} selectedImageUrl={personImageUrl} />
+                  </>
+                )}
               </div>
             </div>
 
-            {/* Step 3 - Generate Button */}
+            {/* Step 2 */}
+            <div className="relative">
+              <div className="absolute -left-2 sm:-left-3 top-0 w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-xs font-bold text-white">3</div>
+              <div className="pl-5 sm:pl-6">
+                <h3 className="text-xs sm:text-sm font-semibold text-gray-300 mb-2 sm:mb-3 uppercase tracking-wider">Customize Model</h3>
+                <OptionsPanel options={options} setOptions={setOptions} isDisabled={isLoading} hideModelAttributes={usePersonPhoto} />
+              </div>
+            </div>
+
+            {/* Step 4 - Generate Button */}
             <div className="relative lg:sticky lg:bottom-4 pt-2 sm:pt-4">
-              <div className="absolute -left-2 sm:-left-3 top-2 sm:top-4 w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-xs font-bold text-white">3</div>
+              <div className="absolute -left-2 sm:-left-3 top-2 sm:top-4 w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-xs font-bold text-white">4</div>
               <div className="pl-5 sm:pl-6">
                 <h3 className="text-xs sm:text-sm font-semibold text-gray-300 mb-2 sm:mb-3 uppercase tracking-wider">Generate</h3>
                 <div className="bg-gray-900/60 backdrop-blur-sm border border-gray-700/50 rounded-xl p-3 sm:p-4">
