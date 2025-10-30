@@ -1,6 +1,7 @@
 import React from 'react';
 import Header from '../components/Header';
 import Button from '../components/Button';
+import BeforeAfterSlider from '../components/BeforeAfterSlider';
 import { useAuth } from '../contexts/AuthContext';
 
 const HomePage: React.FC = () => {
@@ -96,6 +97,73 @@ const HomePage: React.FC = () => {
                   className="w-full h-full object-cover aspect-[3/4]"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent"></div>
+              </div>
+            </div>
+          </section>
+
+          {/* Before/After Showcase Section */}
+          <section className="mb-24">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl sm:text-4xl font-bold mb-4">
+                <span className="bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
+                  See The Magic In Action
+                </span>
+              </h2>
+              <p className="text-gray-400 text-base sm:text-lg max-w-2xl mx-auto px-4">
+                Drag the slider to see how our AI transforms simple product photos into professional model images
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
+              {/* First Example */}
+              <div className="aspect-[3/4] relative group">
+                <div className="absolute -inset-1 bg-gradient-to-br from-blue-500/30 to-purple-500/30 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                <div className="relative h-full border border-gray-700/50 rounded-2xl overflow-hidden shadow-2xl">
+                  <BeforeAfterSlider
+                    beforeImage="https://images.unsplash.com/photo-1556821840-3a63f95609a7?q=80&w=800&auto=format&fit=crop"
+                    afterImage="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=800&auto=format&fit=crop"
+                    beforeLabel="Product Only"
+                    afterLabel="AI Generated"
+                  />
+                </div>
+                <div className="mt-4 text-center">
+                  <p className="text-gray-400 text-sm">Fashion T-Shirt Transformation</p>
+                </div>
+              </div>
+
+              {/* Second Example */}
+              <div className="aspect-[3/4] relative group">
+                <div className="absolute -inset-1 bg-gradient-to-br from-purple-500/30 to-pink-500/30 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                <div className="relative h-full border border-gray-700/50 rounded-2xl overflow-hidden shadow-2xl">
+                  <BeforeAfterSlider
+                    beforeImage="https://images.unsplash.com/photo-1523381210434-271e8be1f52b?q=80&w=800&auto=format&fit=crop"
+                    afterImage="https://images.unsplash.com/photo-1509631179647-0177331693ae?q=80&w=800&auto=format&fit=crop"
+                    beforeLabel="Original"
+                    afterLabel="With Model"
+                  />
+                </div>
+                <div className="mt-4 text-center">
+                  <p className="text-gray-400 text-sm">Clothing Item to Lifestyle Shot</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Feature Highlights */}
+            <div className="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-4xl mx-auto">
+              <div className="text-center p-6 rounded-xl bg-gray-900/40 border border-gray-700/50 backdrop-blur-sm">
+                <div className="text-3xl mb-2">🎯</div>
+                <h4 className="font-semibold text-white mb-2">Perfect Fit</h4>
+                <p className="text-sm text-gray-400">AI ensures clothing looks natural on every model</p>
+              </div>
+              <div className="text-center p-6 rounded-xl bg-gray-900/40 border border-gray-700/50 backdrop-blur-sm">
+                <div className="text-3xl mb-2">✨</div>
+                <h4 className="font-semibold text-white mb-2">Studio Quality</h4>
+                <p className="text-sm text-gray-400">Professional lighting and composition automatically</p>
+              </div>
+              <div className="text-center p-6 rounded-xl bg-gray-900/40 border border-gray-700/50 backdrop-blur-sm">
+                <div className="text-3xl mb-2">⚡</div>
+                <h4 className="font-semibold text-white mb-2">Instant Results</h4>
+                <p className="text-sm text-gray-400">Generate multiple variations in seconds</p>
               </div>
             </div>
           </section>
