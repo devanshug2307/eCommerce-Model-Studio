@@ -47,214 +47,225 @@ const HomePage: React.FC = () => {
   ];
 
   return (
-    <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-gray-100 min-h-screen">
+    <div className="bg-black text-gray-100 min-h-screen font-sans">
       <Header />
-      
-      {/* Hero Section with modern gradient background */}
+
+      {/* Hero Section with elegant design */}
       <main className="relative overflow-hidden">
-        {/* Gradient orbs for visual interest */}
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl"></div>
+        {/* Subtle gradient overlays */}
+        <div className="absolute top-0 left-0 w-full h-96 bg-gradient-to-b from-purple-900/10 via-transparent to-transparent pointer-events-none"></div>
+        <div className="absolute bottom-0 right-0 w-1/2 h-96 bg-gradient-to-tl from-pink-900/5 via-transparent to-transparent pointer-events-none"></div>
         
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 relative z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-32 relative z-10">
           {/* Hero Content */}
-          <section className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-24">
-            <div className="space-y-8">
+          <section className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-20 items-center mb-32">
+            <div className="space-y-8 lg:space-y-10">
               <div className="inline-block">
-                <span className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500/10 border border-blue-500/20 rounded-full text-blue-400 text-sm font-medium">
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <span className="inline-flex items-center gap-2 px-5 py-2.5 bg-white/5 border border-white/10 rounded-full text-gray-300 text-sm font-medium backdrop-blur-sm">
+                  <svg className="w-4 h-4 text-purple-400" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                   </svg>
-                  AI-Powered Photography
+                  AI-Powered Fashion Photography
                 </span>
               </div>
-              
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-extrabold leading-tight">
-                <span className="bg-gradient-to-r from-white via-gray-100 to-gray-300 bg-clip-text text-transparent">
-                  Transform Products
+
+              <h1 className="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-display font-bold leading-[1.1] tracking-tight">
+                <span className="text-white">
+                  Create Stunning
                 </span>
                 <br />
-                <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
-                  Into Model Photos
+                <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-purple-300 bg-clip-text text-transparent">
+                  Model Photography
                 </span>
               </h1>
-              
-              <p className="text-base sm:text-lg lg:text-xl text-gray-300 max-w-xl leading-relaxed">
-                Upload your clothing photos and generate stunning, professional model images in seconds. 
-                No photoshoot required, no expensive equipment—just AI magic.
+
+              <p className="text-lg sm:text-xl lg:text-2xl text-gray-400 max-w-xl leading-relaxed font-light">
+                Transform your product photos into professional fashion imagery with AI models.
+                No photoshoot, no studio—just stunning results in seconds.
               </p>
               
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 pt-4">
-                <Button 
-                  onClick={startStudio} 
-                  className="w-full sm:w-auto px-8 py-4 text-base sm:text-lg font-semibold shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all duration-300 group"
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 sm:gap-5 pt-6">
+                <Button
+                  onClick={startStudio}
+                  className="w-full sm:w-auto px-10 py-5 text-base sm:text-lg font-semibold shadow-2xl shadow-purple-500/20 hover:shadow-purple-500/30 transition-all duration-300 group bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500"
                 >
-                  <span className="flex items-center justify-center gap-2">
-                    Start Creating Free
+                  <span className="flex items-center justify-center gap-2.5">
+                    Start Creating
                     <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
                   </span>
                 </Button>
-                
-                <div className="flex items-center gap-2 text-sm text-gray-400">
-                  <svg className="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  No credit card required
-                </div>
+
+                <button className="px-10 py-5 text-base sm:text-lg font-medium border border-white/20 hover:border-white/40 rounded-lg transition-all duration-300 hover:bg-white/5">
+                  View Examples
+                </button>
               </div>
 
               {/* Social Proof */}
-              <div className="flex items-center gap-4 sm:gap-8 pt-4">
+              <div className="flex items-center gap-8 sm:gap-12 pt-8 border-t border-white/10">
                 <div>
-                  <div className="text-2xl sm:text-3xl font-bold text-white">10K+</div>
-                  <div className="text-xs sm:text-sm text-gray-400">Images Generated</div>
+                  <div className="text-3xl sm:text-4xl font-display font-bold text-white">15K+</div>
+                  <div className="text-sm sm:text-base text-gray-500 font-light mt-1">Images Created</div>
                 </div>
-                <div className="w-px h-10 sm:h-12 bg-gray-700"></div>
+                <div className="w-px h-12 sm:h-14 bg-white/10"></div>
                 <div>
-                  <div className="text-2xl sm:text-3xl font-bold text-white">500+</div>
-                  <div className="text-xs sm:text-sm text-gray-400">Happy Creators</div>
+                  <div className="text-3xl sm:text-4xl font-display font-bold text-white">800+</div>
+                  <div className="text-sm sm:text-base text-gray-500 font-light mt-1">Fashion Brands</div>
                 </div>
               </div>
             </div>
 
-            {/* Hero Image with modern effects */}
-            <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-tr from-blue-500/20 via-purple-500/20 to-pink-500/20 rounded-3xl blur-2xl"></div>
-              <div className="relative rounded-2xl overflow-hidden border border-gray-700/50 bg-gray-900/40 backdrop-blur-sm shadow-2xl transform hover:scale-105 transition-transform duration-500">
+            {/* Hero Image with elegant styling */}
+            <div className="relative lg:h-[700px]">
+              <div className="absolute inset-0 bg-gradient-to-tr from-purple-500/10 via-pink-500/10 to-transparent rounded-3xl blur-3xl"></div>
+              <div className="relative h-full rounded-2xl overflow-hidden border border-white/10 shadow-2xl group">
                 <img
-                  src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?q=80&w=1374&auto=format&fit=crop"
-                  alt="AI Model Preview"
-                  className="w-full h-full object-cover aspect-[3/4]"
+                  src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1200&auto=format&fit=crop"
+                  alt="Fashion Model Photography"
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent"></div>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+                <div className="absolute bottom-6 left-6 right-6">
+                  <div className="inline-block px-4 py-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-lg">
+                    <p className="text-sm font-medium text-white">AI-Generated Fashion Photography</p>
+                  </div>
+                </div>
               </div>
             </div>
           </section>
 
           {/* Before/After Showcase Section */}
-          <section className="mb-24">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl sm:text-4xl font-bold mb-4">
-                <span className="bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
-                  See The Magic In Action
-                </span>
+          <section className="mb-32">
+            <div className="text-center mb-16">
+              <h2 className="text-4xl sm:text-5xl lg:text-6xl font-display font-bold mb-6 text-white">
+                See The Transformation
               </h2>
-              <p className="text-gray-400 text-base sm:text-lg max-w-2xl mx-auto px-4">
-                Drag the slider to see how our AI transforms simple product photos into professional model images
+              <p className="text-gray-400 text-lg sm:text-xl max-w-2xl mx-auto font-light">
+                Drag the slider to see how AI transforms product photos into professional fashion imagery
               </p>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-12 max-w-6xl mx-auto">
               {/* First Example */}
               <div className="aspect-[3/4] relative group">
-                <div className="absolute -inset-1 bg-gradient-to-br from-blue-500/30 to-purple-500/30 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                <div className="relative h-full border border-gray-700/50 rounded-2xl overflow-hidden shadow-2xl">
+                <div className="absolute -inset-2 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-3xl blur-2xl opacity-50 group-hover:opacity-100 transition-opacity duration-500"></div>
+                <div className="relative h-full border border-white/10 rounded-xl overflow-hidden shadow-2xl">
                   <BeforeAfterSlider
                     beforeImage="https://images.unsplash.com/photo-1556821840-3a63f95609a7?q=80&w=800&auto=format&fit=crop"
                     afterImage="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=800&auto=format&fit=crop"
-                    beforeLabel="Product Only"
-                    afterLabel="AI Generated"
+                    beforeLabel="Product"
+                    afterLabel="AI Model"
                   />
                 </div>
-                <div className="mt-4 text-center">
-                  <p className="text-gray-400 text-sm">Fashion T-Shirt Transformation</p>
+                <div className="mt-6 text-center">
+                  <p className="text-gray-500 text-base font-light">From flat lay to fashion model</p>
                 </div>
               </div>
 
               {/* Second Example */}
               <div className="aspect-[3/4] relative group">
-                <div className="absolute -inset-1 bg-gradient-to-br from-purple-500/30 to-pink-500/30 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                <div className="relative h-full border border-gray-700/50 rounded-2xl overflow-hidden shadow-2xl">
+                <div className="absolute -inset-2 bg-gradient-to-br from-pink-500/20 to-purple-500/20 rounded-3xl blur-2xl opacity-50 group-hover:opacity-100 transition-opacity duration-500"></div>
+                <div className="relative h-full border border-white/10 rounded-xl overflow-hidden shadow-2xl">
                   <BeforeAfterSlider
                     beforeImage="https://images.unsplash.com/photo-1523381210434-271e8be1f52b?q=80&w=800&auto=format&fit=crop"
                     afterImage="https://images.unsplash.com/photo-1509631179647-0177331693ae?q=80&w=800&auto=format&fit=crop"
                     beforeLabel="Original"
-                    afterLabel="With Model"
+                    afterLabel="Enhanced"
                   />
                 </div>
-                <div className="mt-4 text-center">
-                  <p className="text-gray-400 text-sm">Clothing Item to Lifestyle Shot</p>
+                <div className="mt-6 text-center">
+                  <p className="text-gray-500 text-base font-light">Professional lifestyle imagery</p>
                 </div>
               </div>
             </div>
 
             {/* Feature Highlights */}
-            <div className="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-4xl mx-auto">
-              <div className="text-center p-6 rounded-xl bg-gray-900/40 border border-gray-700/50 backdrop-blur-sm">
-                <div className="text-3xl mb-2">🎯</div>
-                <h4 className="font-semibold text-white mb-2">Perfect Fit</h4>
-                <p className="text-sm text-gray-400">AI ensures clothing looks natural on every model</p>
+            <div className="mt-16 grid grid-cols-1 sm:grid-cols-3 gap-8 max-w-5xl mx-auto">
+              <div className="text-center p-8 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm hover:bg-white/10 transition-all duration-300">
+                <div className="w-14 h-14 mx-auto mb-4 rounded-xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center">
+                  <svg className="w-7 h-7 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                  </svg>
+                </div>
+                <h4 className="font-semibold text-white mb-3 text-lg">Perfect Fit</h4>
+                <p className="text-sm text-gray-400 font-light leading-relaxed">Clothing naturally adapts to every model</p>
               </div>
-              <div className="text-center p-6 rounded-xl bg-gray-900/40 border border-gray-700/50 backdrop-blur-sm">
-                <div className="text-3xl mb-2">✨</div>
-                <h4 className="font-semibold text-white mb-2">Studio Quality</h4>
-                <p className="text-sm text-gray-400">Professional lighting and composition automatically</p>
+              <div className="text-center p-8 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm hover:bg-white/10 transition-all duration-300">
+                <div className="w-14 h-14 mx-auto mb-4 rounded-xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center">
+                  <svg className="w-7 h-7 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                  </svg>
+                </div>
+                <h4 className="font-semibold text-white mb-3 text-lg">Studio Quality</h4>
+                <p className="text-sm text-gray-400 font-light leading-relaxed">Professional lighting & composition</p>
               </div>
-              <div className="text-center p-6 rounded-xl bg-gray-900/40 border border-gray-700/50 backdrop-blur-sm">
-                <div className="text-3xl mb-2">⚡</div>
-                <h4 className="font-semibold text-white mb-2">Instant Results</h4>
-                <p className="text-sm text-gray-400">Generate multiple variations in seconds</p>
+              <div className="text-center p-8 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm hover:bg-white/10 transition-all duration-300">
+                <div className="w-14 h-14 mx-auto mb-4 rounded-xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center">
+                  <svg className="w-7 h-7 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                </div>
+                <h4 className="font-semibold text-white mb-3 text-lg">Instant Results</h4>
+                <p className="text-sm text-gray-400 font-light leading-relaxed">Generate variations in seconds</p>
               </div>
             </div>
           </section>
 
           {/* How It Works Section */}
-          <section className="mb-16 sm:mb-24">
-            <div className="text-center mb-12 sm:mb-16">
-              <h2 className="text-3xl sm:text-4xl font-bold mb-4">
-                <span className="bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
-                  Simple 3-Step Process
-                </span>
+          <section className="mb-32">
+            <div className="text-center mb-16">
+              <h2 className="text-4xl sm:text-5xl lg:text-6xl font-display font-bold mb-6 text-white">
+                How It Works
               </h2>
-              <p className="text-gray-400 text-base sm:text-lg max-w-2xl mx-auto px-4">
-                From upload to download in minutes. No technical skills required.
+              <p className="text-gray-400 text-lg sm:text-xl max-w-2xl mx-auto font-light">
+                From upload to professional imagery in three simple steps
               </p>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-10 lg:gap-12 max-w-6xl mx-auto">
               {[
                 {
                   step: '01',
-                  title: 'Upload Product',
-                  description: 'Upload your clothing or product photo. Our AI will analyze and prepare it for transformation.',
+                  title: 'Upload',
+                  description: 'Upload your product photo. Our AI analyzes and prepares it for transformation.',
                   icon: (
                     <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                     </svg>
                   ),
                 },
                 {
                   step: '02',
-                  title: 'Customize Model',
-                  description: 'Choose gender, ethnicity, age, pose, and background. Make it perfectly match your brand.',
+                  title: 'Customize',
+                  description: 'Select model attributes, poses, and backgrounds to match your brand identity.',
                   icon: (
                     <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
                     </svg>
                   ),
                 },
                 {
                   step: '03',
-                  title: 'Generate & Download',
-                  description: 'Click generate and watch AI create photorealistic images ready for your e-commerce store.',
+                  title: 'Generate',
+                  description: 'Watch AI create photorealistic fashion imagery ready for your store.',
                   icon: (
                     <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
                     </svg>
                   ),
                 },
               ].map((item, idx) => (
                 <div key={idx} className="relative group">
-                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                  <div className="relative p-8 rounded-2xl border border-gray-700/50 bg-gray-900/40 backdrop-blur-sm hover:border-gray-600 transition-all duration-300">
-                    <div className="text-5xl font-bold text-gray-700/50 mb-4">{item.step}</div>
-                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-gradient-to-br from-blue-500/20 to-purple-500/20 text-blue-400 mb-6">
-                      {item.icon}
+                  <div className="relative p-10 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm hover:bg-white/10 hover:border-white/20 transition-all duration-300">
+                    <div className="text-7xl font-display font-bold text-white/5 absolute top-6 right-6">{item.step}</div>
+                    <div className="relative">
+                      <div className="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 text-purple-400 mb-6">
+                        {item.icon}
+                      </div>
+                      <h3 className="text-2xl font-semibold mb-4 text-white">{item.title}</h3>
+                      <p className="text-gray-400 leading-relaxed font-light">{item.description}</p>
                     </div>
-                    <h3 className="text-xl font-bold mb-3 text-white">{item.title}</h3>
-                    <p className="text-gray-400 leading-relaxed">{item.description}</p>
                   </div>
                 </div>
               ))}
