@@ -4,6 +4,7 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import UpgradePage from './pages/Upgrade';
 import HomePage from './pages/Home';
+import GalleryPage from './pages/Gallery';
 import { AuthProvider } from './contexts/AuthContext';
 import AuthGuard from './components/AuthGuard';
 
@@ -27,6 +28,12 @@ function Router() {
     Page = (
       <AuthGuard>
         <App />
+      </AuthGuard>
+    );
+  } else if (path === '/gallery') {
+    Page = (
+      <AuthGuard>
+        <GalleryPage />
       </AuthGuard>
     );
   } else if (path === '/upgrade') {

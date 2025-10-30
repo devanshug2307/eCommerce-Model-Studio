@@ -147,6 +147,16 @@ const Header: React.FC = () => {
                 Studio
               </button>
               <button
+                onClick={() => navigateTo('/gallery')}
+                className={`px-4 py-2 text-sm rounded-md font-medium transition-all duration-200 ${
+                  currentPath === '/gallery' 
+                    ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg' 
+                    : 'text-gray-300 hover:text-white hover:bg-gray-700/50'
+                }`}
+              >
+                Gallery
+              </button>
+              <button
                 onClick={() => navigateTo('/upgrade')}
                 className={`px-4 py-2 text-sm rounded-md font-medium transition-all duration-200 ${
                   currentPath === '/upgrade' 
@@ -243,6 +253,16 @@ const Header: React.FC = () => {
               }`}
             >
               Studio
+            </button>
+            <button
+              onClick={() => navigateTo('/gallery')}
+              className={`flex-1 px-2 py-2.5 text-xs rounded-md font-medium transition-all duration-200 ${
+                currentPath === '/gallery' 
+                  ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white' 
+                  : 'text-gray-300 hover:text-white hover:bg-gray-700/50'
+              }`}
+            >
+              Gallery
             </button>
             <button
               onClick={() => navigateTo('/upgrade')}

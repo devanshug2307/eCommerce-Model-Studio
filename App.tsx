@@ -7,6 +7,7 @@ import Button from './components/Button';
 import Spinner from './components/Spinner';
 import { ModelOptions, GeneratedImage } from './types';
 import { generateImageBatch, generateImageVariation } from './services/geminiService';
+import { uploadToGallery } from './services/galleryService';
 import { consumeCredits, creditsNeededPerImage, syncCredits } from './services/creditsService';
 
 // Icons for buttons
@@ -146,6 +147,16 @@ function App() {
         category: result.category,
       }));
       setGeneratedImages(newImages);
+
+      // Save each generated image to the user's gallery (best-effort)
+      try {
+        await Promise.all(
+          newImages.map(async (img) => {
+            // Best-effort, ignore individual failures
+            await uploadToGallery(img.src);
+          })
+        );
+      } catch {}
     } catch (err: any) {
       setError(err.message || 'An unknown error occurred.');
       console.error(err);
