@@ -17,22 +17,22 @@ const FAQAccordion: React.FC<FAQProps> = ({ items }) => {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {items.map((item, index) => (
         <div
           key={index}
-          className="bg-gray-900/60 backdrop-blur-sm border border-gray-700/50 rounded-xl overflow-hidden hover:border-gray-600 transition-all duration-300"
+          className="bg-white border border-gray-200 rounded-xl overflow-hidden hover:border-deep-teal/30 transition-all duration-300 shadow-sm"
         >
           <button
             onClick={() => toggleItem(index)}
-            className="w-full flex items-center justify-between p-5 sm:p-6 text-left focus:outline-none group"
+            className="w-full flex items-center justify-between p-6 text-left focus:outline-none group"
           >
-            <span className="font-semibold text-white text-base sm:text-lg pr-4 group-hover:text-blue-400 transition-colors">
+            <span className="font-semibold text-rich-black text-lg pr-4 group-hover:text-deep-teal transition-colors">
               {item.question}
             </span>
             <svg
               className={`w-5 h-5 text-gray-400 flex-shrink-0 transition-transform duration-300 ${
-                openIndex === index ? 'rotate-180' : ''
+                openIndex === index ? 'rotate-180 text-deep-teal' : ''
               }`}
               fill="none"
               viewBox="0 0 24 24"
@@ -51,7 +51,7 @@ const FAQAccordion: React.FC<FAQProps> = ({ items }) => {
               openIndex === index ? 'max-h-96' : 'max-h-0'
             }`}
           >
-            <div className="px-5 sm:px-6 pb-5 sm:pb-6 text-gray-300 text-sm sm:text-base leading-relaxed">
+            <div className="px-6 pb-6 text-gray-600 text-base leading-relaxed border-t border-gray-100 pt-4">
               {item.answer}
             </div>
           </div>
