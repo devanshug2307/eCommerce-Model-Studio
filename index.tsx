@@ -5,6 +5,8 @@ import App from './App';
 import UpgradePage from './pages/Upgrade';
 import HomePage from './pages/Home';
 import GalleryPage from './pages/Gallery';
+import ShowcasePage from './pages/Showcase';
+import AdminShowcasePage from './pages/AdminShowcase';
 import { AuthProvider } from './contexts/AuthContext';
 import AuthGuard from './components/AuthGuard';
 
@@ -38,6 +40,14 @@ function Router() {
     );
   } else if (path === '/upgrade') {
     Page = <UpgradePage />;
+  } else if (path === '/showcase') {
+    Page = <ShowcasePage />;
+  } else if (path === '/admin/showcase') {
+    Page = (
+      <AuthGuard>
+        <AdminShowcasePage />
+      </AuthGuard>
+    );
   } else {
     Page = <HomePage />;
   }

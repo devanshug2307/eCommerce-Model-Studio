@@ -7,6 +7,7 @@ import FAQAccordion from '../components/FAQ';
 import Footer from '../components/Footer';
 import StatsCounter from '../components/StatsCounter';
 import { useAuth } from '../contexts/AuthContext';
+import PublicShowcase from '../components/PublicShowcase';
 
 const HomePage: React.FC = () => {
   const { user } = useAuth();
@@ -521,6 +522,11 @@ const HomePage: React.FC = () => {
           </section>
         </div>
       </main>
+
+      {/* Public Showcase Section */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <PublicShowcase />
+      </div>
 
       <Footer />
     </div>

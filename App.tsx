@@ -71,6 +71,37 @@ function App() {
     }
   }, []);
 
+  // Prefill options from URL params for Showcase deep-links
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    let changed = false;
+    const next: Partial<ModelOptions> = {};
+    const get = (k: string) => params.get(k) || undefined;
+    const g = get('gender');
+    if (g && (g === 'Female' || g === 'Male')) { next.gender = g as any; changed = true; }
+    const a = get('age');
+    const ageVals: ModelOptions['age'][] = ['Young Adult (18-25)','Adult (25-40)','Teenager (13-17)','Child (3-7)'];
+    if (a && ageVals.includes(a as any)) { next.age = a as any; changed = true; }
+    const e = get('ethnicity');
+    const ethVals: ModelOptions['ethnicity'][] = ['Asian','Black','Caucasian','Hispanic','Indian','Middle Eastern'];
+    if (e && ethVals.includes(e as any)) { next.ethnicity = e as any; changed = true; }
+    const b = get('background');
+    const bgVals: ModelOptions['background'][] = ['Studio White','Studio Gray','Outdoor Urban','Outdoor Nature'];
+    if (b && bgVals.includes(b as any)) { next.background = b as any; changed = true; }
+    const p = get('pose');
+    const poseVals: NonNullable<ModelOptions['pose']>[] = ['Standing','Walking','Seated','Half-body','Close-up'];
+    if (p && poseVals.includes(p as any)) { next.pose = p as any; changed = true; }
+    if (changed) {
+      setOptions(prev => ({ ...prev, ...next }));
+      // Optionally clean URL (keep other params like status)
+      const kept = new URLSearchParams(window.location.search);
+      ['gender','age','ethnicity','background','pose'].forEach(k => kept.delete(k));
+      const qs = kept.toString();
+      const url = qs ? `${window.location.pathname}?${qs}` : window.location.pathname;
+      window.history.replaceState({}, document.title, url);
+    }
+  }, []);
+
   const handleImageSelect = useCallback((file: File) => {
     setProductImage(file);
     if (productImageUrl) {

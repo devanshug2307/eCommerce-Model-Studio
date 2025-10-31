@@ -137,6 +137,16 @@ const Header: React.FC = () => {
                 Home
               </button>
               <button
+                onClick={() => navigateTo('/showcase')}
+                className={`px-4 py-2 text-sm rounded-md font-medium transition-all duration-200 ${
+                  currentPath === '/showcase'
+                    ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg'
+                    : 'text-gray-300 hover:text-white hover:bg-gray-700/50'
+                }`}
+              >
+                Showcase
+              </button>
+              <button
                 onClick={() => navigateTo('/studio')}
                 className={`px-4 py-2 text-sm rounded-md font-medium transition-all duration-200 ${
                   currentPath === '/studio' 
@@ -243,6 +253,16 @@ const Header: React.FC = () => {
               }`}
             >
               Home
+            </button>
+            <button
+              onClick={() => navigateTo('/showcase')}
+              className={`flex-1 px-2 py-2.5 text-xs rounded-md font-medium transition-all duration-200 ${
+                currentPath === '/showcase'
+                  ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white'
+                  : 'text-gray-300 hover:text-white hover:bg-gray-700/50'
+              }`}
+            >
+              Showcase
             </button>
             <button
               onClick={() => navigateTo('/studio')}
