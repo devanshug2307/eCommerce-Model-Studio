@@ -6,6 +6,8 @@ type ShowcaseItem = {
   title?: string;
   public_url: string;
   storage_path: string;
+  input_public_url?: string | null;
+  input_storage_path?: string | null;
   gender?: 'Male' | 'Female';
   age?: string;
   ethnicity?: string;
@@ -61,6 +63,7 @@ const ShowcasePage: React.FC = () => {
 
   const unique = (arr: (string|undefined)[]) => Array.from(new Set(arr.filter(Boolean) as string[]));
   const genders = unique(items.map(i => i.gender));
+  const [openBA, setOpenBA] = React.useState<ShowcaseItem | null>(null);
   const ages = unique(items.map(i => i.age));
   const ethnics = unique(items.map(i => i.ethnicity));
   const backgrounds = unique(items.map(i => i.background));
@@ -121,7 +124,12 @@ const ShowcasePage: React.FC = () => {
                       {it.age && <span className="px-2 py-1 rounded bg-gray-800/80">{it.age}</span>}
                       {it.ethnicity && <span className="px-2 py-1 rounded bg-gray-800/80">{it.ethnicity}</span>}
                     </div>
-                    <button className="px-2 py-1 bg-blue-600 hover:bg-blue-500 text-xs rounded" onClick={(e) => { e.stopPropagation(); useThisModel(it); }}>Use this model</button>
+                    <div className="flex gap-2">
+                      {it.input_public_url && (
+                        <button className="px-2 py-1 bg-gray-800/80 hover:bg-gray-700 text-xs rounded" onClick={(e) => { e.stopPropagation(); setOpenBA(it); }}>Before/After</button>
+                      )}
+                      <button className="px-2 py-1 bg-blue-600 hover:bg-blue-500 text-xs rounded" onClick={(e) => { e.stopPropagation(); useThisModel(it); }}>Use this model</button>
+                    </div>
                   </div>
                 </div>
                 <div className="p-3 text-xs text-gray-400 flex items-center justify-between">
@@ -130,6 +138,24 @@ const ShowcasePage: React.FC = () => {
                 </div>
               </div>
             ))}
+          </div>
+        )}
+        {openBA && (
+          <div className="fixed inset-0 z-50">
+            <div className="absolute inset-0 bg-black/70" onClick={()=>setOpenBA(null)} />
+            <div className="absolute inset-0 flex items-center justify-center p-4">
+              <div className="bg-gray-900 border border-gray-700 rounded-xl max-w-4xl w-full p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="text-sm text-gray-300">Before / After</div>
+                  <button className="text-gray-400 hover:text-gray-200" onClick={()=>setOpenBA(null)}>Close</button>
+                </div>
+                {openBA.input_public_url ? (
+                  <div className="rounded overflow-hidden">
+                    <iframe title="before-after" style={{width:'100%', height:'65vh', border:'0'}} srcDoc={`<!DOCTYPE html><html><head><meta charset='utf-8'/><meta name='viewport' content='width=device-width,initial-scale=1'/><style>body{margin:0;background:#0b0b0b}</style></head><body><div id='root'></div><script>const root=document.getElementById('root');const wrap=document.createElement('div');wrap.style.position='relative';wrap.style.maxWidth='100%';wrap.style.height='65vh';wrap.style.overflow='hidden';const before=document.createElement('img');before.src='${openBA.input_public_url}';before.style.width='100%';before.style.height='100%';before.style.objectFit='contain';const after=document.createElement('img');after.src='${openBA.public_url}';after.style.width='100%';after.style.height='100%';after.style.objectFit='contain';after.style.position='absolute';after.style.top='0';after.style.left='0';const slider=document.createElement('input');slider.type='range';slider.min='0';slider.max='100';slider.value='50';slider.style.position='absolute';slider.style.bottom='8px';slider.style.left='8px';slider.style.right='8px';slider.style.width='calc(100% - 16px)';slider.oninput=()=>{after.style.clipPath='inset(0 '+(100-slider.value)+'% 0 0)'};after.style.clipPath='inset(0 50% 0 0)';wrap.appendChild(before);wrap.appendChild(after);wrap.appendChild(slider);root.appendChild(wrap);</script></body></html>`} />
+                  </div>
+                ) : null}
+              </div>
+            </div>
           </div>
         )}
       </main>

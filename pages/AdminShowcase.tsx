@@ -148,12 +148,26 @@ const AdminShowcasePage: React.FC = () => {
     try {
       const apiBase = (import.meta.env.VITE_API_BASE_URL || (typeof window !== 'undefined' ? window.location.origin : '')) as string;
       const sel = previews.filter(p => p.selected);
+      // convert product input file to dataUrl once
+      let inputDataUrl: string | null = null;
+      if (productImage) {
+        inputDataUrl = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(String(reader.result));
+          reader.onerror = reject;
+          reader.readAsDataURL(productImage as File);
+        });
+      }
       for (const p of sel) {
-        await fetch(`${apiBase}/api/showcase/upload`, {
+        const resp = await fetch(`${apiBase}/api/showcase/upload`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${(await (await import('../lib/supabase')).supabase.auth.getSession()).data.session?.access_token || ''}` },
-          body: JSON.stringify({ dataUrl: p.dataUrl, ...p.meta }),
+          body: JSON.stringify({ dataUrl: p.dataUrl, inputDataUrl, ...p.meta }),
         });
+        if (!resp.ok) {
+          const t = await resp.text();
+          throw new Error(`Upload failed: ${t}`);
+        }
       }
       alert('Published to Showcase');
       setPreviews([]);
