@@ -150,24 +150,40 @@ const AdminShowcasePage: React.FC = () => {
       const apiBase = (import.meta.env.VITE_API_BASE_URL || (typeof window !== 'undefined' ? window.location.origin : '')) as string;
       const sel = previews.filter(p => p.selected);
       // convert product input file to dataUrl once
-      let inputDataUrl: string | null = null;
+      let input_public_url: string | null = null;
+      let input_storage_path: string | null = null;
+      const dataUrlToBlob = (du: string): Blob => {
+        const arr = du.split(',');
+        const mime = arr[0].match(/:(.*?);/)?.[1] || 'image/jpeg';
+        const bstr = atob(arr[1]);
+        let n = bstr.length; const u8 = new Uint8Array(n);
+        while (n--) u8[n] = bstr.charCodeAt(n);
+        return new Blob([u8], { type: mime });
+      };
+      const userId = (await supabase.auth.getUser()).data.user?.id || 'anon';
       if (productImage) {
-        inputDataUrl = await new Promise<string>((resolve, reject) => {
+        // Read + downscale + upload input to Storage
+        let inputDataUrl = await new Promise<string>((resolve, reject) => {
           const reader = new FileReader();
           reader.onload = () => resolve(String(reader.result));
           reader.onerror = reject;
           reader.readAsDataURL(productImage as File);
         });
-        // downscale input to reduce payload (helps avoid 413)
         inputDataUrl = await downscaleDataUrl(inputDataUrl, 1600, 0.9, 'image/jpeg').catch(()=>inputDataUrl!);
+        const inBlob = dataUrlToBlob(inputDataUrl);
+        const inPath = `${userId}/in-${Date.now()}-${Math.random().toString(36).slice(2)}.jpg`;
+        const { error: inErr } = await supabase.storage.from('showcase').upload(inPath, inBlob, { upsert: true, contentType: inBlob.type || 'image/jpeg', cacheControl: '3600' });
+        if (inErr) throw inErr;
+        const { data: inUrlData } = supabase.storage.from('showcase').getPublicUrl(inPath);
+        input_public_url = inUrlData.publicUrl;
+        input_storage_path = inPath;
       }
       for (const p of sel) {
         // downscale output then upload directly to Supabase Storage
         const outDataUrl = await downscaleDataUrl(p.dataUrl, 1600, 0.92, 'image/jpeg').catch(()=>p.dataUrl);
-        const outBlob = await (await fetch(outDataUrl)).blob();
-        const userId = (await supabase.auth.getUser()).data.user?.id || 'anon';
+        const outBlob = dataUrlToBlob(outDataUrl);
         const path = `${userId}/out-${Date.now()}-${Math.random().toString(36).slice(2)}.jpg`;
-        const { error: upErr } = await supabase.storage.from('showcase').upload(path, outBlob, { upsert: true, contentType: 'image/jpeg' });
+        const { error: upErr } = await supabase.storage.from('showcase').upload(path, outBlob, { upsert: true, contentType: outBlob.type || 'image/jpeg', cacheControl: '3600' });
         if (upErr) throw upErr;
         const { data: urlData } = supabase.storage.from('showcase').getPublicUrl(path);
         const public_url = urlData.publicUrl;
@@ -177,7 +193,7 @@ const AdminShowcasePage: React.FC = () => {
         const resp = await fetch(`${apiBase}/api/showcase/upload`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-          body: JSON.stringify({ public_url, storage_path, inputDataUrl, ...p.meta }),
+          body: JSON.stringify({ public_url, storage_path, input_public_url: input_public_url, input_storage_path: input_storage_path, ...p.meta }),
         });
         if (!resp.ok) {
           const t = await resp.text();
