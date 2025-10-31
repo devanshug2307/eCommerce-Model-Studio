@@ -33,10 +33,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(403).json({ error: 'Forbidden (not an admin)' });
     }
 
-    const { dataUrl, public_url: providedPublicUrl, storage_path: providedStoragePath, inputDataUrl, input_public_url: inputPublicUrlBody, input_storage_path: inputStoragePathBody, gender, age, ethnicity, background, pose, category, title, tags } = (req.body || {}) as any;
-    if (!dataUrl && !(providedPublicUrl && providedStoragePath)) {
-      return res.status(400).json({ error: 'Provide either dataUrl or public_url + storage_path' });
+    const { dataUrl, gender, age, ethnicity, background, pose, category, title, tags } = (req.body || {}) as any;
+    if (!dataUrl || typeof dataUrl !== 'string' || !dataUrl.startsWith('data:')) {
+      return res.status(400).json({ error: 'Missing or invalid dataUrl' });
     }
+
+    const mimeMatch = dataUrl.match(/^data:(.*?);base64,/);
+    const mimeType = mimeMatch?.[1] || 'image/png';
+    const base64 = dataUrl.split(',')[1];
+    const buffer = Buffer.from(base64, 'base64');
 
     // Ensure bucket exists (idempotent)
     await fetch(`${SUPABASE_URL}/storage/v1/bucket`, {
@@ -49,67 +54,27 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       body: JSON.stringify({ name: 'showcase', public: true }),
     });
 
-    let storagePath: string;
-    let publicUrl: string;
-    if (dataUrl) {
-      const mimeMatch = dataUrl.match(/^data:(.*?);base64,/);
-      const mimeType = mimeMatch?.[1] || 'image/png';
-      const base64 = dataUrl.split(',')[1];
-      const buffer = Buffer.from(base64, 'base64');
-      const ext = mimeType.split('/')[1] || 'png';
-      const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-      storagePath = `${userId}/${filename}`;
-      const uploadResp = await fetch(`${SUPABASE_URL}/storage/v1/object/showcase/${encodeURIComponent(storagePath)}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': mimeType,
-          'apikey': SERVICE_ROLE_KEY,
-          'Authorization': `Bearer ${SERVICE_ROLE_KEY}`,
-          'x-upsert': 'true',
-        },
-        body: buffer,
-      });
-      if (!uploadResp.ok) {
-        const t = await uploadResp.text();
-        return res.status(400).json({ error: 'Upload failed', detail: t });
-      }
-      publicUrl = `${SUPABASE_URL}/storage/v1/object/public/showcase/${encodeURIComponent(storagePath)}`;
-    } else {
-      storagePath = String(providedStoragePath);
-      publicUrl = String(providedPublicUrl);
+    const ext = mimeType.split('/')[1] || 'png';
+    const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+    const storagePath = `${userId}/${filename}`;
+
+    // Upload object
+    const uploadResp = await fetch(`${SUPABASE_URL}/storage/v1/object/showcase/${encodeURIComponent(storagePath)}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': mimeType,
+        'apikey': SERVICE_ROLE_KEY,
+        'Authorization': `Bearer ${SERVICE_ROLE_KEY}`,
+        'x-upsert': 'true',
+      },
+      body: buffer,
+    });
+    if (!uploadResp.ok) {
+      const t = await uploadResp.text();
+      return res.status(400).json({ error: 'Upload failed', detail: t });
     }
 
-    // Optionally upload input image
-    let inputPublicUrl: string | null = null;
-    let inputStoragePath: string | null = null;
-    if (inputPublicUrlBody && typeof inputPublicUrlBody === 'string') {
-      inputPublicUrl = inputPublicUrlBody;
-      inputStoragePath = inputStoragePathBody || null;
-    } else if (inputDataUrl && typeof inputDataUrl === 'string' && inputDataUrl.startsWith('data:')) {
-      const iMimeMatch = inputDataUrl.match(/^data:(.*?);base64,/);
-      const iMimeType = iMimeMatch?.[1] || 'image/png';
-      const iBase64 = inputDataUrl.split(',')[1];
-      const iBuffer = Buffer.from(iBase64, 'base64');
-      const iExt = iMimeType.split('/')[1] || 'png';
-      const iFilename = `input-${Date.now()}-${Math.random().toString(36).slice(2)}.${iExt}`;
-      const iPath = `${userId}/${iFilename}`;
-      const iUpload = await fetch(`${SUPABASE_URL}/storage/v1/object/showcase/${encodeURIComponent(iPath)}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': iMimeType,
-          'apikey': SERVICE_ROLE_KEY,
-          'Authorization': `Bearer ${SERVICE_ROLE_KEY}`,
-          'x-upsert': 'true',
-        },
-        body: iBuffer,
-      });
-      if (!iUpload.ok) {
-        const t = await iUpload.text();
-        return res.status(400).json({ error: 'Input upload failed', detail: t });
-      }
-      inputPublicUrl = `${SUPABASE_URL}/storage/v1/object/public/showcase/${encodeURIComponent(iPath)}`;
-      inputStoragePath = iPath;
-    }
+    const publicUrl = `${SUPABASE_URL}/storage/v1/object/public/showcase/${encodeURIComponent(storagePath)}`;
 
     // Record in public_showcase (service role bypasses RLS)
     const insertResp = await fetch(`${SUPABASE_URL}/rest/v1/public_showcase`, {
@@ -127,8 +92,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         gender, age, ethnicity, background, pose, category: category || null,
         tags: Array.isArray(tags) ? tags : null,
         created_by: userId,
-        input_public_url: inputPublicUrl,
-        input_storage_path: inputStoragePath,
       }),
     });
     if (!insertResp.ok) {
