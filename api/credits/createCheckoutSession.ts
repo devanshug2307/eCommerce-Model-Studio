@@ -113,13 +113,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     console.log('Calling Dodo Payments API:', { apiUrl, apiBaseUrl, environment });
     
     // Build request body according to Dodo Payments API documentation
-    // Reference: https://docs.dodopayments.com/api-reference/introduction
+    // References:
+    // - https://docs.dodopayments.com/developer-resources/checkout-session
+    // - Allowed methods incl. UPI: upi_collect, upi_intent + keep credit/debit as fallback
     const requestBody = {
       product_cart: [
         { product_id: productId, quantity: 1 },
       ],
-      // Always provide 'credit' and 'debit' as fallback (required by API)
-      allowed_payment_method_types: ['credit', 'debit'],
+      // Prefer UPI for India; retain card fallbacks per docs
+      // Docs: "It's critical to include 'credit' and 'debit' as fallback options."
+      // https://docs.dodopayments.com/developer-resources/checkout-session
+      allowed_payment_method_types: ['upi_collect', 'upi_intent', 'credit', 'debit'],
+      // UPI requires INR; if your product is priced in INR this keeps checkout in INR
+      billing_currency: 'INR',
+      // Keep checkout minimal for digital goods by omitting billing/shipping/customer address fields
       metadata: {
         user_id: userId,
         credit_pack: String(pack),
