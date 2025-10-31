@@ -1,5 +1,5 @@
 import React from 'react';
-import BeforeAfterSlider from './BeforeAfterSlider';
+import ShowcaseItemModal from './ShowcaseItemModal';
 
 type ShowcaseItem = {
   id: string;
@@ -17,6 +17,7 @@ type ShowcaseItem = {
 const PublicShowcase: React.FC = () => {
   const [items, setItems] = React.useState<ShowcaseItem[]>([]);
   const [loading, setLoading] = React.useState<boolean>(true);
+  const [selected, setSelected] = React.useState<ShowcaseItem | null>(null);
 
   React.useEffect(() => {
     (async () => {
@@ -58,13 +59,10 @@ const PublicShowcase: React.FC = () => {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {items.map(it => (
           <div key={it.id} className="group bg-gray-800/60 border border-gray-700/50 rounded-lg overflow-hidden">
-            <div className="relative cursor-pointer" onClick={() => useThisModel(it)}>
-              {it.input_public_url ? (
-                <div className="w-full aspect-square">
-                  <BeforeAfterSlider beforeImage={it.input_public_url} afterImage={it.public_url} />
-                </div>
-              ) : (
-                <img src={it.public_url} alt={it.title || 'Model'} className="w-full h-auto block" loading="lazy" />
+            <div className="relative cursor-pointer" onClick={() => setSelected(it)}>
+              <img src={it.public_url} alt={it.title || 'Model'} className="w-full h-auto block" loading="lazy" />
+              {it.input_public_url && (
+                <div className="absolute top-2 left-2 text-[10px] px-2 py-1 rounded bg-black/60 border border-white/10 text-white">Compare</div>
               )}
               <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-t from-black/60 via-transparent to-transparent flex items-end justify-between p-2">
                 <div className="text-[10px] flex gap-1">
@@ -77,6 +75,7 @@ const PublicShowcase: React.FC = () => {
           </div>
         ))}
       </div>
+      {selected && <ShowcaseItemModal item={selected} onClose={() => setSelected(null)} />}
     </section>
   );
 };

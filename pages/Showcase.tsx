@@ -1,5 +1,5 @@
 import React from 'react';
-import BeforeAfterSlider from '../components/BeforeAfterSlider';
+import ShowcaseItemModal from '../components/ShowcaseItemModal';
 import Header from '../components/Header';
 
 type ShowcaseItem = {
@@ -20,6 +20,7 @@ type ShowcaseItem = {
 const ShowcasePage: React.FC = () => {
   const [items, setItems] = React.useState<ShowcaseItem[]>([]);
   const [loading, setLoading] = React.useState<boolean>(true);
+  const [selected, setSelected] = React.useState<ShowcaseItem | null>(null);
   const [q, setQ] = React.useState('');
   const [gender, setGender] = React.useState('');
   const [age, setAge] = React.useState('');
@@ -115,13 +116,10 @@ const ShowcasePage: React.FC = () => {
           <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-4">
             {items.map((it) => (
               <div key={it.id || it.storage_path} className="mb-4 break-inside-avoid bg-gray-800 rounded-lg border border-gray-700 shadow hover:shadow-lg transition-shadow">
-                <div className="relative overflow-hidden rounded-t-lg cursor-pointer" onClick={() => useThisModel(it)}>
-                  {it.input_public_url ? (
-                    <div className="w-full aspect-square">
-                      <BeforeAfterSlider beforeImage={it.input_public_url} afterImage={it.public_url} />
-                    </div>
-                  ) : (
-                    <img src={it.public_url} alt={it.title || 'Showcase'} loading="lazy" className="w-full h-auto block" />
+                <div className="relative overflow-hidden rounded-t-lg cursor-pointer" onClick={() => setSelected(it)}>
+                  <img src={it.public_url} alt={it.title || 'Showcase'} loading="lazy" className="w-full h-auto block" />
+                  {it.input_public_url && (
+                    <div className="absolute top-2 left-2 text-[10px] px-2 py-1 rounded bg-black/60 border border-white/10 text-white">Compare</div>
                   )}
                   <div className="absolute inset-0 opacity-0 hover:opacity-100 transition-opacity bg-gradient-to-t from-black/60 via-transparent to-transparent flex items-end justify-between p-2">
                     <div className="flex gap-2 text-[10px]">
@@ -141,6 +139,7 @@ const ShowcasePage: React.FC = () => {
           </div>
         )}
       </main>
+      {selected && <ShowcaseItemModal item={selected} onClose={() => setSelected(null)} />}
     </div>
   );
 };

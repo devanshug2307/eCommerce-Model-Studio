@@ -26,6 +26,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (q.background) params.push(`background=eq.${encodeURIComponent(String(q.background))}`);
     if (q.pose) params.push(`pose=eq.${encodeURIComponent(String(q.pose))}`);
     if (q.category) params.push(`category=eq.${encodeURIComponent(String(q.category))}`);
+    if (q.input_storage_path) params.push(`input_storage_path=eq.${encodeURIComponent(String(q.input_storage_path))}`);
     if (q.created_by) params.push(`created_by=eq.${encodeURIComponent(String(q.created_by))}`);
 
     // Basic text search
