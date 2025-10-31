@@ -34,10 +34,11 @@ function App() {
   const [productImage, setProductImage] = useState<File | null>(null);
   const [productImageUrl, setProductImageUrl] = useState<string | null>(null);
   const [options, setOptions] = useState<ModelOptions>({
-    gender: 'Woman',
+    gender: 'Female',
     age: 'Young Adult (18-25)',
     ethnicity: 'Caucasian',
     background: 'Studio White',
+    pose: 'Standing',
     imagesCount: 3,
   });
   const [generatedImages, setGeneratedImages] = useState<GeneratedImage[]>([]);
@@ -50,6 +51,7 @@ function App() {
   const [usePersonPhoto, setUsePersonPhoto] = useState<boolean>(false);
   const [personImage, setPersonImage] = useState<File | null>(null);
   const [personImageUrl, setPersonImageUrl] = useState<string | null>(null);
+  const [moreCount, setMoreCount] = useState<number>(3);
 
   // Sync credits from database on mount and after payment
   useEffect(() => {
@@ -236,6 +238,9 @@ function App() {
   const estimatedCost = creditsNeededPerImage() * (options.imagesCount || 3);
   const availableCredits = getCredits();
   const insufficientCredits = availableCredits < estimatedCost;
+
+  const estimatedMoreCost = creditsNeededPerImage() * (moreCount || 1);
+  const insufficientCreditsMore = availableCredits < estimatedMoreCost;
 
   return (
     <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-gray-100 min-h-screen font-sans">
@@ -450,6 +455,82 @@ function App() {
               </div>
             )}
 
+            {/* Generate More */}
+            {!isLoading && generatedImages.length > 0 && (
+              <div className="mt-6 bg-gray-900/60 backdrop-blur-sm border border-gray-700/50 rounded-xl p-4">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+                  <div className="text-sm text-gray-300 font-medium">Generate more</div>
+                  <div className="flex items-center gap-2">
+                    <label className="text-xs text-gray-400">Count</label>
+                    <select
+                      value={moreCount}
+                      onChange={(e) => setMoreCount(Number(e.target.value))}
+                      className="bg-gray-800/60 border border-gray-700/50 rounded-lg px-2 py-1 text-sm text-gray-200"
+                    >
+                      {[1,2,3,4,5,6].map(n => (
+                        <option key={n} value={n}>{n}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="text-[11px] text-gray-400">Will use {estimatedMoreCost} credits. Available: {availableCredits}</div>
+                  <div className="sm:ml-auto flex items-center gap-2">
+                    <Button
+                      onClick={async () => {
+                        if (!productImage) return;
+                        const need = creditsNeededPerImage() * (moreCount || 1);
+                        const use = await consumeCredits(need);
+                        if (!use.ok) {
+                          setError(use.error || `Not enough credits. You need ${need} credits.`);
+                          return;
+                        }
+                        setIsLoading(true);
+                        setError(null);
+                        try {
+                          const results = await generateImageBatch(
+                            productImage,
+                            options,
+                            moreCount || 1,
+                            usePersonPhoto && personImage ? personImage : undefined
+                          );
+                          const newImages = results.map((result, index) => ({
+                            id: `more-${Date.now()}-${index}`,
+                            src: result.src,
+                            category: result.category,
+                          }));
+                          setGeneratedImages(prev => [...prev, ...newImages]);
+                          try {
+                            await Promise.all(newImages.map(async (img) => {
+                              await uploadToGallery(img.src, {
+                                background: options.background,
+                                category: img.category,
+                                ...(usePersonPhoto ? {} : { gender: options.gender, age: options.age, ethnicity: options.ethnicity })
+                              });
+                            }));
+                          } catch {}
+                        } catch (err:any) {
+                          setError(err.message || 'An unknown error occurred.');
+                        } finally {
+                          setIsLoading(false);
+                        }
+                      }}
+                      disabled={isLoading || insufficientCreditsMore}
+                      className="text-sm"
+                    >
+                      Generate More
+                    </Button>
+                    {insufficientCreditsMore && (
+                      <button 
+                        onClick={() => { window.history.pushState({}, '', '/upgrade'); window.dispatchEvent(new PopStateEvent('popstate')); }}
+                        className="text-[11px] text-blue-400 hover:text-blue-300 underline"
+                      >
+                        Buy credits
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
           </div>
         </div>
 
@@ -482,6 +563,24 @@ function App() {
         onApplyNew={applyEditedOutputNew}
         onReplace={applyEditedOutputReplace}
       />
+
+      {/* Sticky mobile generate bar */}
+      <div className="fixed bottom-0 left-0 right-0 md:hidden z-40">
+        <div className="m-3 rounded-xl border border-gray-700/60 bg-gray-900/90 backdrop-blur px-3 py-3 flex items-center gap-3 shadow-lg">
+          <div className="text-[11px] text-gray-400">
+            {isLoading ? 'Generating…' : `This run uses ${estimatedCost} credits. Available: ${availableCredits}`}
+          </div>
+          <Button
+            onClick={handleGenerateClick}
+            isLoading={isLoading}
+            disabled={isGenerateDisabled}
+            className="ml-auto px-4 py-2 text-sm"
+            icon={<SparklesIcon className="h-4 w-4" />}
+          >
+            Generate
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }

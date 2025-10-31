@@ -56,15 +56,56 @@ const OptionsPanel: React.FC<OptionsPanelProps> = ({ options, setOptions, isDisa
     setOptions((prev) => ({ ...prev, [key]: value }));
   };
 
-  const genderOptions: ModelOptions['gender'][] = ['Woman', 'Man', 'Girl', 'Boy'];
+  const genderOptions: ModelOptions['gender'][] = ['Female', 'Male'];
   const ethnicityOptions: ModelOptions['ethnicity'][] = ['Asian', 'Black', 'Caucasian', 'Hispanic', 'Indian', 'Middle Eastern'];
   const ageOptions: ModelOptions['age'][] = ['Young Adult (18-25)', 'Adult (25-40)', 'Teenager (13-17)', 'Child (3-7)'];
   const backgroundOptions: ModelOptions['background'][] = ['Studio White', 'Studio Gray', 'Outdoor Urban', 'Outdoor Nature'];
   const imageCountOptions: number[] = [1, 2, 3, 4, 5, 6];
+  const poseOptions: NonNullable<ModelOptions['pose']>[] = ['Standing', 'Walking', 'Seated', 'Half-body', 'Close-up'];
+
+  const randomizeOnce = () => {
+    const pick = <T,>(arr: readonly T[]): T => arr[Math.floor(Math.random() * arr.length)];
+    setOptions(prev => ({
+      ...prev,
+      gender: pick(['Female','Male'] as const),
+      age: pick(['Young Adult (18-25)','Adult (25-40)','Teenager (13-17)','Child (3-7)'] as const),
+      ethnicity: pick(['Asian','Black','Caucasian','Hispanic','Indian','Middle Eastern'] as const),
+      background: pick(['Studio White','Studio Gray','Outdoor Urban','Outdoor Nature'] as const),
+      pose: pick(poseOptions as readonly typeof poseOptions[number][]),
+    }));
+  };
 
   return (
     <div className="w-full">
       <div className="space-y-6">
+        <div>
+          <label className="block text-sm font-medium text-gray-300 mb-3 flex items-center gap-2">
+            <svg className="w-4 h-4 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v1a1 1 0 01-1 1H7a1 1 0 100 2h1a1 1 0 011 1v1a1 1 0 102 0v-1a1 1 0 011-1h1a1 1 0 100-2h-1a1 1 0 01-1-1V7z" clipRule="evenodd" />
+            </svg>
+            Surprise Me (random per image)
+          </label>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              disabled={isDisabled}
+              onClick={() => handleOptionChange('surpriseMe', !options.surpriseMe)}
+              className={`px-3 py-2 text-sm rounded-lg border ${options.surpriseMe ? 'bg-blue-600 border-blue-500 text-white' : 'bg-gray-800/60 text-gray-300 border-gray-700/50'}`}
+            >
+              {options.surpriseMe ? 'Enabled' : 'Disabled'}
+            </button>
+            <button
+              type="button"
+              disabled={isDisabled}
+              onClick={randomizeOnce}
+              className="px-3 py-2 text-sm rounded-lg bg-gray-800/60 text-gray-300 border border-gray-700/50 hover:bg-gray-700"
+            >
+              🎲 Randomize once
+            </button>
+          </div>
+          <p className="text-xs text-gray-500 mt-2">Enabled: each image will use random gender, age, ethnicity, background, and pose.</p>
+        </div>
+        
         <div>
           <label className="block text-sm font-medium text-gray-300 mb-3 flex items-center gap-2">
             <svg className="w-4 h-4 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
@@ -87,13 +128,13 @@ const OptionsPanel: React.FC<OptionsPanelProps> = ({ options, setOptions, isDisa
             Each image costs 10 credits
           </p>
         </div>
-        {!hideModelAttributes && (
+        {!hideModelAttributes && !options.surpriseMe && (
         <div>
           <label className="block text-sm font-medium text-gray-300 mb-3 flex items-center gap-2">
             <svg className="w-4 h-4 text-purple-400" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
             </svg>
-            Model Gender
+            Gender
           </label>
           <div className="flex flex-wrap gap-2">
             {genderOptions.map(gender => (
@@ -104,7 +145,7 @@ const OptionsPanel: React.FC<OptionsPanelProps> = ({ options, setOptions, isDisa
           </div>
         </div>
         )}
-        {!hideModelAttributes && (
+        {!hideModelAttributes && !options.surpriseMe && (
         <div>
           <label className="block text-sm font-medium text-gray-300 mb-3 flex items-center gap-2">
             <svg className="w-4 h-4 text-pink-400" fill="currentColor" viewBox="0 0 20 20">
@@ -121,7 +162,7 @@ const OptionsPanel: React.FC<OptionsPanelProps> = ({ options, setOptions, isDisa
           </div>
         </div>
         )}
-        {!hideModelAttributes && (
+        {!hideModelAttributes && !options.surpriseMe && (
         <div>
           <label className="block text-sm font-medium text-gray-300 mb-3 flex items-center gap-2">
             <svg className="w-4 h-4 text-green-400" fill="currentColor" viewBox="0 0 20 20">
@@ -138,6 +179,19 @@ const OptionsPanel: React.FC<OptionsPanelProps> = ({ options, setOptions, isDisa
           </div>
         </div>
         )}
+        {!hideModelAttributes && !options.surpriseMe && (
+        <div>
+          <label className="block text-sm font-medium text-gray-300 mb-3">Pose</label>
+          <div className="flex flex-wrap gap-2">
+            {poseOptions.map(p => (
+              <span key={p}>
+                <OptionButton label={p} isSelected={options.pose === p} onClick={() => handleOptionChange('pose', p as any)} disabled={isDisabled} />
+              </span>
+            ))}
+          </div>
+        </div>
+        )}
+        {!options.surpriseMe && (
         <div>
             <label className="block text-sm font-medium text-gray-300 mb-3 flex items-center gap-2">
               <svg className="w-4 h-4 text-orange-400" fill="currentColor" viewBox="0 0 20 20">
@@ -152,6 +206,7 @@ const OptionsPanel: React.FC<OptionsPanelProps> = ({ options, setOptions, isDisa
                 <BackgroundOption label="Nature" style={{backgroundImage: 'linear-gradient(to bottom right, #16a34a, #15803d)', color: 'white'}} isSelected={options.background === 'Outdoor Nature'} onClick={() => handleOptionChange('background', 'Outdoor Nature')} disabled={isDisabled} />
             </div>
         </div>
+        )}
       </div>
     </div>
   );

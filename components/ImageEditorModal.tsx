@@ -23,19 +23,19 @@ const ImageEditorModal: React.FC<ImageEditorModalProps> = ({ open, src, title = 
   return (
     <div className="fixed inset-0 z-50">
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
-      <div className="absolute inset-0 flex flex-col">
-        <div className="mx-auto my-6 w-full max-w-6xl max-h-[85vh] rounded-lg border border-gray-700 bg-gray-900 shadow-xl overflow-hidden flex flex-col">
+      <div className="absolute inset-0 flex flex-col overflow-y-auto">
+        <div className="mx-auto my-6 w-full max-w-6xl max-h-[90vh] rounded-lg border border-gray-700 bg-gray-900 shadow-xl overflow-hidden flex flex-col">
           <header className="flex items-center justify-between px-4 py-3 border-b border-gray-800">
             <div className="text-gray-200 font-semibold">{title}</div>
             <div className="flex items-center gap-2">
               <Button variant="secondary" className="text-sm py-1" onClick={onClose}>Close</Button>
             </div>
           </header>
-          <div className="grid grid-cols-12 gap-0 h-full">
-            <div className="col-span-12 lg:col-span-9 p-4 overflow-auto">
+          <div className="grid grid-cols-12 gap-0 h-full min-h-0">
+            <div className="col-span-12 lg:col-span-9 p-4 overflow-auto min-h-0">
               <ImageEditor src={src} onApply={(du) => setLastDataUrl(du)} />
             </div>
-            <aside className="col-span-12 lg:col-span-3 border-t lg:border-t-0 lg:border-l border-gray-800 p-4 flex flex-col gap-2 overflow-auto">
+            <aside className="col-span-12 lg:col-span-3 border-t lg:border-t-0 lg:border-l border-gray-800 p-4 flex flex-col gap-2 overflow-auto min-h-0">
               <p className="text-xs text-gray-400">Non-destructive editing. Apply as New to keep the original, or Replace it.</p>
               <Button
                 onClick={() => { if (lastDataUrl) onApplyNew(lastDataUrl); }}

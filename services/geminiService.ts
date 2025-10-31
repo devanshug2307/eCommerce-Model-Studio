@@ -1,6 +1,19 @@
 import { GoogleGenAI, Modality } from "@google/genai";
 import { ModelOptions } from '../types';
 
+function mapGenderTerm(gender: 'Male' | 'Female', age?: ModelOptions['age']): string {
+  const isChild = age?.includes('Child') || age?.includes('Teenager');
+  if (gender === 'Female') return isChild ? 'girl' : 'woman';
+  return isChild ? 'boy' : 'man';
+}
+
+function buildPersona(options: ModelOptions): string {
+  const term = mapGenderTerm(options.gender, options.age);
+  const ageWord = options.age?.includes('Child') ? 'child' : options.age?.includes('Teenager') ? 'teenager' : 'adult';
+  const eth = (options.ethnicity || '').toLowerCase();
+  return `${ageWord} ${eth} ${term}`.trim();
+}
+
 const fileToGenerativePart = async (file: File) => {
   const base64EncodedDataPromise = new Promise<string>((resolve) => {
     const reader = new FileReader();
@@ -21,30 +34,31 @@ const dataUrlToGenerativePart = (dataUrl: string) => {
 };
 
 const buildPromptForCategory = (options: ModelOptions, category: string): string => {
-  const { gender, age, ethnicity, background } = options;
+  const { age, ethnicity, background } = options;
 
   let backgroundDescription = '';
   switch (background) {
     case 'Studio White': backgroundDescription = 'a professional photo studio with a clean, plain white background'; break;
     case 'Studio Gray': backgroundDescription = 'a professional photo studio with a plain, neutral gray background'; break;
-
+    
     case 'Outdoor Urban': backgroundDescription = 'an outdoor urban city street setting with a slightly blurred background'; break;
     case 'Outdoor Nature': backgroundDescription = 'an outdoor nature setting, like a park or forest, with natural lighting'; break;
   }
-  
-  const commonPrompt = `The lighting must be bright, even, and professional, highlighting the product's details. Do not add any text, logos, or watermarks. The final image must be ultra-photorealistic and suitable for a high-end eCommerce website like Amazon or Flipkart.`;
+  const poseHint = options.pose ? `Pose: ${options.pose}.` : '';
+  const commonPrompt = `${poseHint} Do not add any text, logos, or watermarks. The final image must be ultra-photorealistic and suitable for a high-end eCommerce website like Amazon or Flipkart.`;
 
+  const persona = buildPersona(options);
   switch (category) {
     case 'Standing Pose':
-      return `Take the provided product image and realistically place it on a ${age} ${ethnicity} ${gender.toLowerCase()} model in a confident, full-body standing pose. The setting should be ${backgroundDescription}. ${commonPrompt}`;
+      return `Take the provided product image and realistically place it on a ${persona} in a confident, full-body standing pose. The setting should be ${backgroundDescription}. ${commonPrompt}`;
     case 'Action Pose':
-      return `Take the provided product image and realistically place it on a ${age} ${ethnicity} ${gender.toLowerCase()} model in a dynamic action pose, like walking or turning naturally. The setting should be ${backgroundDescription}. ${commonPrompt}`;
+      return `Take the provided product image and realistically place it on a ${persona} in a dynamic action pose, like walking or turning naturally. The setting should be ${backgroundDescription}. ${commonPrompt}`;
     case 'Detail Shot':
-      return `Take the provided product image and create a close-up, detailed shot on a ${age} ${ethnicity} ${gender.toLowerCase()} model, focusing on the product's texture and features. The setting should be ${backgroundDescription}. ${commonPrompt}`;
+      return `Take the provided product image and create a close-up, detailed shot on a ${persona}, focusing on the product's texture and features. The setting should be ${backgroundDescription}. ${commonPrompt}`;
     case 'Aesthetic Shot':
-      return `Take the provided product image and create a cinematic, aesthetic, editorial-style shot with a ${age} ${ethnicity} ${gender.toLowerCase()} model. The pose should be stylish and engaging. The setting should be ${backgroundDescription}. ${commonPrompt}`;
+      return `Take the provided product image and create a cinematic, aesthetic shot with a ${persona}. The pose should be stylish and engaging. The setting should be ${backgroundDescription}. ${commonPrompt}`;
     case 'Flat Lay':
-      return `Create a cinematic and artfully styled 'flat lay' photograph using the provided product image. Arrange the product on a complementary textured surface like rustic wood, cool marble, or soft linen. Include 1-2 subtle, tasteful props that enhance the product's story without distracting from it. Use soft, diffused natural lighting to create a gentle, high-end mood with soft shadows. The composition should be balanced and visually appealing. No models. ${commonPrompt}`;
+      return `Create a cinematic and artfully styled 'flat lay' photograph using the provided product image. Arrange the product on a complementary textured surface like rustic wood, cool marble, or soft linen. Include 1-2 subtle, tasteful props that enhance the product's story without distracting from it. Use soft, diffused lighting. The composition should be balanced and visually appealing. No models. ${commonPrompt}`;
     case 'Hanger Shot':
       return `Create a cinematic, high-end shot of the product from the provided image hanging on a quality wooden or metallic hanger. Place it against an interesting but non-distracting background, such as a textured wall with soft, artistic shadows or in a minimalist boutique setting. The lighting should be professional and directional, beautifully highlighting the product's shape and fabric. No models. ${commonPrompt}`;
     default:
@@ -54,15 +68,17 @@ const buildPromptForCategory = (options: ModelOptions, category: string): string
 
 
 const buildVariationPrompt = (options: ModelOptions): string => {
-  const { gender, age, ethnicity, background } = options;
+  const { age, ethnicity, background } = options;
+  const poseNote = options.pose ? `Pose: ${options.pose}.` : '';
+  const persona = buildPersona(options);
   return `Using the provided product image (first image) and the existing model photo (second image) as a reference, generate a new, slightly different version.
-Maintain the same product, model characteristics (${age} ${ethnicity} ${gender.toLowerCase()}), and background style (${background}).
+Maintain the same product and the same ${persona}, and background style (${background}). ${poseNote}
 Introduce a subtle variation in the model's pose, expression, or the camera angle.
 The goal is a new, unique image that is consistent with the original's quality and style for an eCommerce website.
 The result must be photorealistic, professional, and free of any text or watermarks.`;
 };
 
-const buildTryOnPrompt = (background: string, category: string): string => {
+const buildTryOnPrompt = (background: string, category: string, opt?: ModelOptions): string => {
   let backgroundDescription = '';
   switch (background) {
     case 'Studio White': backgroundDescription = 'Use a clean studio look with a plain white background.'; break;
@@ -72,7 +88,9 @@ const buildTryOnPrompt = (background: string, category: string): string => {
   }
   const common = 'Do not change the person’s identity, face, hairstyle, skin tone, body shape, pose, or camera framing. Align the garment naturally with correct perspective, realistic fabric drape, occlusions (hands/hair), and lighting/shadows. No logos, text, or watermarks.';
   const shot = category || 'Try-on';
-  return `Virtual try-on task. The first image is the PERSON photo. The second image is the GARMENT/Product photo. Put the garment from the second image onto the same person from the first image in a realistic way. ${common} ${backgroundDescription} Output: one photorealistic ${shot} result.`;
+  const poseNote = opt?.pose ? `Pose: ${opt.pose}.` : '';
+  const personaText = opt ? buildPersona(opt) : 'subject';
+  return `Virtual try-on task. The first image is the PERSON photo. The second image is the GARMENT/Product photo. Put the garment from the second image onto the same person from the first image in a realistic way. Keep the same ${personaText} (do not change age group or gender). ${common} ${backgroundDescription} ${poseNote} Output: one photorealistic ${shot} result.`;
 };
 
 export const generateImageBatch = async (
@@ -100,10 +118,23 @@ export const generateImageBatch = async (
   const shuffled = [...shotCategories].sort(() => Math.random() - 0.5);
   const selectedCategories = shuffled.slice(0, desiredCount);
 
+  // helper to randomize fields per image when surpriseMe is true (and not try-on)
+  const pick = <T,>(arr: readonly T[]): T => arr[Math.floor(Math.random() * arr.length)];
+  const randomize = (base: ModelOptions): ModelOptions => ({
+    ...base,
+    gender: pick(['Female','Male'] as const),
+    age: pick(['Young Adult (18-25)','Adult (25-40)','Teenager (13-17)','Child (3-7)'] as const),
+    ethnicity: pick(['Asian','Black','Caucasian','Hispanic','Indian','Middle Eastern'] as const),
+    background: pick(['Studio White','Studio Gray','Outdoor Urban','Outdoor Nature'] as const),
+    pose: pick(['Standing','Walking','Seated','Half-body','Close-up'] as const),
+  });
+
   const generationPromises = selectedCategories.map(async (category) => {
+    const allowRandom = options.surpriseMe && !personPart;
+    const eff = allowRandom ? randomize(options) : options;
     const textPart = { text: personPart
-      ? buildTryOnPrompt(options.background, category)
-      : buildPromptForCategory(options, category)
+      ? buildTryOnPrompt(eff.background, category, eff)
+      : buildPromptForCategory(eff, category)
     };
     // For try-on: first part is PERSON, second is GARMENT; text describes this mapping
     const parts = personPart ? [personPart, productPart, textPart] : [productPart, textPart];
