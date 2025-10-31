@@ -95,7 +95,10 @@ export const generateImageBatch = async (
     'Flat Lay', 'Hanger Shot'
   ];
 
-  const selectedCategories = shotCategories.slice(0, Math.max(1, Math.min(count, shotCategories.length)));
+  // Pick categories randomly (unique up to available types)
+  const desiredCount = Math.max(1, Math.min(count, shotCategories.length));
+  const shuffled = [...shotCategories].sort(() => Math.random() - 0.5);
+  const selectedCategories = shuffled.slice(0, desiredCount);
 
   const generationPromises = selectedCategories.map(async (category) => {
     const textPart = { text: personPart

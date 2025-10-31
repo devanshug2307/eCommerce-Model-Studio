@@ -23,6 +23,8 @@ const GalleryPage: React.FC = () => {
     setRotations((prev) => ({ ...prev, [id]: ((prev[id] || 0) + 90) % 360 }));
   };
 
+  
+
   return (
     <AuthGuard>
       <div className="max-w-6xl mx-auto px-4 py-8">

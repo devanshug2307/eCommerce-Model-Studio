@@ -8,7 +8,7 @@ import Spinner from './components/Spinner';
 import { ModelOptions, GeneratedImage } from './types';
 import { generateImageBatch, generateImageVariation } from './services/geminiService';
 import { uploadToGallery } from './services/galleryService';
-import { consumeCredits, creditsNeededPerImage, syncCredits } from './services/creditsService';
+import { consumeCredits, creditsNeededPerImage, syncCredits, getCredits } from './services/creditsService';
 
 // Icons for buttons
 const SparklesIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
@@ -233,6 +233,9 @@ function App() {
   };
 
   const isGenerateDisabled = !productImage || isLoading;
+  const estimatedCost = creditsNeededPerImage() * (options.imagesCount || 3);
+  const availableCredits = getCredits();
+  const insufficientCredits = availableCredits < estimatedCost;
 
   return (
     <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-gray-100 min-h-screen font-sans">
@@ -322,6 +325,26 @@ function App() {
                   >
                       Generate Photos
                   </Button>
+                  <div className="mt-2">
+                    {insufficientCredits ? (
+                      <div className="text-[11px] sm:text-xs text-red-300 bg-red-900/20 border border-red-700/40 rounded-md px-2 py-1.5">
+                        This run needs {estimatedCost} credits, you have {availableCredits}.{' '}
+                        <button
+                          onClick={() => {
+                            window.history.pushState({}, '', '/upgrade');
+                            window.dispatchEvent(new PopStateEvent('popstate'));
+                          }}
+                          className="text-red-200 underline underline-offset-2 hover:text-red-100"
+                        >
+                          Buy credits
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="text-[11px] sm:text-xs text-gray-400">
+                        This run will use {estimatedCost} credits. Available: {availableCredits}
+                      </div>
+                    )}
+                  </div>
                   {error && (
                     <div className="mt-3 p-2.5 sm:p-3 bg-red-900/30 border border-red-700/50 rounded-lg">
                       <p className="text-red-300 text-xs text-center">{error}</p>
