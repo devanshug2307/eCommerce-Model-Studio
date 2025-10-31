@@ -36,7 +36,16 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
             <p className="text-gray-400 mb-6">Please sign in to access the application.</p>
           </div>
         </div>
-        <AuthModal isOpen={showAuthModal} onClose={() => {}} />
+        <AuthModal 
+          isOpen={showAuthModal} 
+          onClose={() => {
+            setShowAuthModal(false);
+            if (typeof window !== 'undefined' && window.location.pathname !== '/') {
+              window.history.pushState({}, '', '/');
+              window.dispatchEvent(new PopStateEvent('popstate'));
+            }
+          }} 
+        />
       </>
     );
   }

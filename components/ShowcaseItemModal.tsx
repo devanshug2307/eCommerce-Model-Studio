@@ -37,8 +37,9 @@ const ShowcaseItemModal: React.FC<Props> = ({ item, onClose }) => {
         const resp = await fetch(`${apiBase}/api/showcase/list?input_storage_path=${encodeURIComponent(item.input_storage_path)}&limit=36`);
         const data = await resp.json();
         const items = Array.isArray(data.items) ? data.items : [];
-        // Put current first, rest unique by id
-        const filtered = items.filter((x: ShowcaseItem) => x.id !== item.id);
+        // Client-side guard: ensure only items with the same input_storage_path are used
+        const sameInput = items.filter((x: ShowcaseItem) => x.input_storage_path === item.input_storage_path);
+        const filtered = sameInput.filter((x: ShowcaseItem) => x.id !== item.id);
         setRelated(filtered);
       } catch {
         setRelated([]);

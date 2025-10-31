@@ -76,16 +76,16 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
   };
 
   return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-md z-50 flex items-center justify-center p-3 sm:p-4 animate-fadeIn">
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-md z-[10000] flex items-center justify-center p-3 sm:p-4 animate-fadeIn">
       <div className="relative max-w-md w-full max-h-[95vh] overflow-y-auto">
         {/* Gradient glow effect */}
-        <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-2xl blur opacity-20"></div>
+        <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-2xl blur opacity-20 pointer-events-none"></div>
         
         {/* Modal content */}
-        <div className="relative bg-gray-900/95 backdrop-blur-xl rounded-xl sm:rounded-2xl shadow-2xl border border-gray-700/50 overflow-hidden">
+        <div className="relative z-10 bg-gray-900/95 backdrop-blur-xl rounded-xl sm:rounded-2xl shadow-2xl border border-gray-700/50 overflow-hidden">
           {/* Header with gradient */}
           <div className="relative px-4 sm:px-6 pt-4 sm:pt-6 pb-3 sm:pb-4">
-            <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/10"></div>
+            <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/10 pointer-events-none"></div>
             <div className="relative flex justify-between items-start mb-2">
               <div>
                 <h2 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
@@ -135,7 +135,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
 
             {/* Divider */}
             <div className="relative my-5 sm:my-6">
-              <div className="absolute inset-0 flex items-center">
+              <div className="absolute inset-0 flex items-center pointer-events-none">
                 <div className="w-full border-t border-gray-700/50"></div>
               </div>
               <div className="relative flex justify-center text-[10px] sm:text-xs">
