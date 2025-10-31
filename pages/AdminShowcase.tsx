@@ -4,6 +4,7 @@ import AuthGuard from '../components/AuthGuard';
 import ImageUploader from '../components/ImageUploader';
 import Button from '../components/Button';
 import { useAuth } from '../contexts/AuthContext';
+import { supabase } from '../lib/supabase';
 import { generateImageBatch } from '../services/geminiService';
 import { creditsNeededPerImage } from '../services/creditsService';
 
@@ -154,11 +155,44 @@ const AdminShowcasePage: React.FC = () => {
     try {
       const apiBase = (import.meta.env.VITE_API_BASE_URL || (typeof window !== 'undefined' ? window.location.origin : '')) as string;
       const sel = previews.filter(p => p.selected);
+      if (!user) { alert('Not signed in'); return; }
+      // 1) Upload input image once (if available)
+      let input_storage_path: string | null = null;
+      let input_public_url: string | null = null;
+      if (productImage) {
+        const inName = `${user.id}/${Date.now()}-input-${Math.random().toString(36).slice(2)}.${productImage.name.split('.').pop() || 'png'}`;
+        const inRes = await supabase.storage.from('showcase').upload(inName, productImage, { upsert: false, contentType: productImage.type || 'image/png' });
+        if (inRes.error) throw new Error(inRes.error.message);
+        input_storage_path = inRes.data.path;
+        input_public_url = `${supabase.storage.from('showcase').getPublicUrl(inRes.data.path).data.publicUrl}`;
+      }
+
+      const dataUrlToBlob = async (dataUrl: string): Promise<Blob> => {
+        const res = await fetch(dataUrl);
+        return await res.blob();
+      };
+
       for (const p of sel) {
+        // 2) Upload generated image to storage directly
+        const blob = await dataUrlToBlob(p.dataUrl);
+        const ext = (blob.type.split('/')[1]) || 'png';
+        const outName = `${user.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+        const up = await supabase.storage.from('showcase').upload(outName, blob, { upsert: false, contentType: blob.type || 'image/png' });
+        if (up.error) throw new Error(up.error.message);
+        const storagePath = up.data.path;
+        const publicUrl = `${supabase.storage.from('showcase').getPublicUrl(storagePath).data.publicUrl}`;
+
+        // 3) Record via API (small payload only)
         await fetch(`${apiBase}/api/showcase/upload`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${(await (await import('../lib/supabase')).supabase.auth.getSession()).data.session?.access_token || ''}` },
-          body: JSON.stringify({ dataUrl: p.dataUrl, inputDataUrl: productImageDataUrl, ...p.meta }),
+          body: JSON.stringify({
+            storagePath,
+            publicUrl,
+            input_storage_path,
+            input_public_url,
+            ...p.meta
+          }),
         });
       }
       alert('Published to Showcase');
