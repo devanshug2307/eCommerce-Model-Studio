@@ -157,12 +157,16 @@ const AdminShowcasePage: React.FC = () => {
           reader.onerror = reject;
           reader.readAsDataURL(productImage as File);
         });
+        // downscale input to reduce payload (helps avoid 413)
+        inputDataUrl = await downscaleDataUrl(inputDataUrl, 1600, 0.9, 'image/jpeg').catch(()=>inputDataUrl!);
       }
       for (const p of sel) {
+        // downscale output as well
+        const outDataUrl = await downscaleDataUrl(p.dataUrl, 1600, 0.92, 'image/jpeg').catch(()=>p.dataUrl);
         const resp = await fetch(`${apiBase}/api/showcase/upload`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${(await (await import('../lib/supabase')).supabase.auth.getSession()).data.session?.access_token || ''}` },
-          body: JSON.stringify({ dataUrl: p.dataUrl, inputDataUrl, ...p.meta }),
+          body: JSON.stringify({ dataUrl: outDataUrl, inputDataUrl, ...p.meta }),
         });
         if (!resp.ok) {
           const t = await resp.text();
@@ -173,6 +177,37 @@ const AdminShowcasePage: React.FC = () => {
       setPreviews([]);
     } catch {}
   };
+
+  // Downscale a data URL to reduce size (avoids 413 payload too large)
+  async function downscaleDataUrl(
+    dataUrl: string,
+    maxSize = 1600,
+    quality = 0.9,
+    type: 'image/jpeg' | 'image/png' = 'image/jpeg'
+  ): Promise<string> {
+    return new Promise<string>((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        let { width, height } = img;
+        const scale = Math.min(1, maxSize / Math.max(width, height));
+        const w = Math.max(1, Math.round(width * scale));
+        const h = Math.max(1, Math.round(height * scale));
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) { resolve(dataUrl); return; }
+        ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(img, 0, 0, w, h);
+        try {
+          const out = canvas.toDataURL(type, quality);
+          resolve(out);
+        } catch { resolve(dataUrl); }
+      };
+      img.onerror = reject;
+      img.src = dataUrl;
+    });
+  }
 
   if (!adminAllowed) {
     return (
