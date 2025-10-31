@@ -1,4 +1,5 @@
 import React from 'react';
+import BeforeAfterSlider from '../components/BeforeAfterSlider';
 import Header from '../components/Header';
 
 type ShowcaseItem = {
@@ -6,6 +7,7 @@ type ShowcaseItem = {
   title?: string;
   public_url: string;
   storage_path: string;
+  input_public_url?: string | null;
   gender?: 'Male' | 'Female';
   age?: string;
   ethnicity?: string;
@@ -114,7 +116,13 @@ const ShowcasePage: React.FC = () => {
             {items.map((it) => (
               <div key={it.id || it.storage_path} className="mb-4 break-inside-avoid bg-gray-800 rounded-lg border border-gray-700 shadow hover:shadow-lg transition-shadow">
                 <div className="relative overflow-hidden rounded-t-lg cursor-pointer" onClick={() => useThisModel(it)}>
-                  <img src={it.public_url} alt={it.title || 'Showcase'} loading="lazy" className="w-full h-auto block" />
+                  {it.input_public_url ? (
+                    <div className="w-full aspect-square">
+                      <BeforeAfterSlider beforeImage={it.input_public_url} afterImage={it.public_url} />
+                    </div>
+                  ) : (
+                    <img src={it.public_url} alt={it.title || 'Showcase'} loading="lazy" className="w-full h-auto block" />
+                  )}
                   <div className="absolute inset-0 opacity-0 hover:opacity-100 transition-opacity bg-gradient-to-t from-black/60 via-transparent to-transparent flex items-end justify-between p-2">
                     <div className="flex gap-2 text-[10px]">
                       {it.gender && <span className="px-2 py-1 rounded bg-gray-800/80">{it.gender}</span>}

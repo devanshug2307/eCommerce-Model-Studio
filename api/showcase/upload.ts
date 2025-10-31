@@ -33,7 +33,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(403).json({ error: 'Forbidden (not an admin)' });
     }
 
-    const { dataUrl, gender, age, ethnicity, background, pose, category, title, tags } = (req.body || {}) as any;
+    const { dataUrl, inputDataUrl, gender, age, ethnicity, background, pose, category, title, tags } = (req.body || {}) as any;
     if (!dataUrl || typeof dataUrl !== 'string' || !dataUrl.startsWith('data:')) {
       return res.status(400).json({ error: 'Missing or invalid dataUrl' });
     }
@@ -42,6 +42,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const mimeType = mimeMatch?.[1] || 'image/png';
     const base64 = dataUrl.split(',')[1];
     const buffer = Buffer.from(base64, 'base64');
+
+    // Optional input image (before)
+    let inputMimeType: string | null = null;
+    let inputBuffer: Buffer | null = null;
+    if (inputDataUrl && typeof inputDataUrl === 'string' && inputDataUrl.startsWith('data:')) {
+      const inMatch = inputDataUrl.match(/^data:(.*?);base64,/);
+      inputMimeType = inMatch?.[1] || 'image/png';
+      const inBase64 = inputDataUrl.split(',')[1];
+      inputBuffer = Buffer.from(inBase64, 'base64');
+    }
 
     // Ensure bucket exists (idempotent)
     await fetch(`${SUPABASE_URL}/storage/v1/bucket`, {
@@ -58,6 +68,31 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
     const storagePath = `${userId}/${filename}`;
 
+    // If input was provided, upload it first to get paths/urls
+    let inputStoragePath: string | null = null;
+    let inputPublicUrl: string | null = null;
+    if (inputBuffer && inputMimeType) {
+      const inExt = inputMimeType.split('/')[1] || 'png';
+      const inFilename = `${Date.now()}-input-${Math.random().toString(36).slice(2)}.${inExt}`;
+      inputStoragePath = `${userId}/${inFilename}`;
+
+      const inResp = await fetch(`${SUPABASE_URL}/storage/v1/object/showcase/${encodeURIComponent(inputStoragePath)}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': inputMimeType,
+          'apikey': SERVICE_ROLE_KEY,
+          'Authorization': `Bearer ${SERVICE_ROLE_KEY}`,
+          'x-upsert': 'true',
+        },
+        body: new Blob([Uint8Array.from(inputBuffer)], { type: inputMimeType }),
+      });
+      if (!inResp.ok) {
+        const t = await inResp.text();
+        return res.status(400).json({ error: 'Input upload failed', detail: t });
+      }
+      inputPublicUrl = `${SUPABASE_URL}/storage/v1/object/public/showcase/${encodeURIComponent(inputStoragePath)}`;
+    }
+
     // Upload object
     const uploadResp = await fetch(`${SUPABASE_URL}/storage/v1/object/showcase/${encodeURIComponent(storagePath)}`, {
       method: 'POST',
@@ -67,7 +102,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         'Authorization': `Bearer ${SERVICE_ROLE_KEY}`,
         'x-upsert': 'true',
       },
-      body: buffer,
+      body: new Blob([Uint8Array.from(buffer)], { type: mimeType }),
     });
     if (!uploadResp.ok) {
       const t = await uploadResp.text();
@@ -92,6 +127,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         gender, age, ethnicity, background, pose, category: category || null,
         tags: Array.isArray(tags) ? tags : null,
         created_by: userId,
+        input_public_url: inputPublicUrl || null,
+        input_storage_path: inputStoragePath || null,
       }),
     });
     if (!insertResp.ok) {

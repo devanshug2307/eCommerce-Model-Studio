@@ -21,6 +21,7 @@ const AdminShowcasePage: React.FC = () => {
   const [adminAllowed, setAdminAllowed] = React.useState<boolean>(false);
   const [productImage, setProductImage] = React.useState<File | null>(null);
   const [productImageUrl, setProductImageUrl] = React.useState<string | null>(null);
+  const [productImageDataUrl, setProductImageDataUrl] = React.useState<string | null>(null);
   const [selected, setSelected] = React.useState({
     genders: new Set<string>(['Female']),
     ages: new Set<string>(['Adult (25-40)']),
@@ -60,6 +61,11 @@ const AdminShowcasePage: React.FC = () => {
     setProductImage(file);
     if (productImageUrl) URL.revokeObjectURL(productImageUrl);
     setProductImageUrl(URL.createObjectURL(file));
+    // Also read as data URL for publishing as input image
+    const reader = new FileReader();
+    reader.onload = () => setProductImageDataUrl(typeof reader.result === 'string' ? reader.result : null);
+    reader.onerror = () => setProductImageDataUrl(null);
+    reader.readAsDataURL(file);
   };
 
   // Utilities for sampling and seeding
@@ -152,7 +158,7 @@ const AdminShowcasePage: React.FC = () => {
         await fetch(`${apiBase}/api/showcase/upload`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${(await (await import('../lib/supabase')).supabase.auth.getSession()).data.session?.access_token || ''}` },
-          body: JSON.stringify({ dataUrl: p.dataUrl, ...p.meta }),
+          body: JSON.stringify({ dataUrl: p.dataUrl, inputDataUrl: productImageDataUrl, ...p.meta }),
         });
       }
       alert('Published to Showcase');

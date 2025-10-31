@@ -1,9 +1,11 @@
 import React from 'react';
+import BeforeAfterSlider from './BeforeAfterSlider';
 
 type ShowcaseItem = {
   id: string;
   title?: string;
   public_url: string;
+  input_public_url?: string | null;
   gender?: 'Male' | 'Female';
   age?: string;
   ethnicity?: string;
@@ -57,7 +59,13 @@ const PublicShowcase: React.FC = () => {
         {items.map(it => (
           <div key={it.id} className="group bg-gray-800/60 border border-gray-700/50 rounded-lg overflow-hidden">
             <div className="relative cursor-pointer" onClick={() => useThisModel(it)}>
-              <img src={it.public_url} alt={it.title || 'Model'} className="w-full h-auto block" loading="lazy" />
+              {it.input_public_url ? (
+                <div className="w-full aspect-square">
+                  <BeforeAfterSlider beforeImage={it.input_public_url} afterImage={it.public_url} />
+                </div>
+              ) : (
+                <img src={it.public_url} alt={it.title || 'Model'} className="w-full h-auto block" loading="lazy" />
+              )}
               <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-t from-black/60 via-transparent to-transparent flex items-end justify-between p-2">
                 <div className="text-[10px] flex gap-1">
                   {it.gender && <span className="px-1.5 py-0.5 rounded bg-gray-800/80">{it.gender}</span>}
