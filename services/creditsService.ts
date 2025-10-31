@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase';
 const STORAGE_KEY = 'ems_user_credits_v1';
 
 export type CreditPack = 100 | 200 | 300;
+export type PaymentPreference = 'upi_intent' | 'upi_collect' | 'card';
 
 // Get user ID from Supabase auth
 export async function getUserId(): Promise<string | null> {
@@ -142,7 +143,10 @@ export function mapPackToCredits(pack: CreditPack): number {
 }
 
 // Start a checkout session on your backend and return redirect URL
-export async function startCheckout(pack: CreditPack): Promise<{ url: string }> {
+export async function startCheckout(
+  pack: CreditPack,
+  prefer?: PaymentPreference
+): Promise<{ url: string }> {
   const apiUrl = (import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_CHECKOUT_API_URL || (typeof window !== 'undefined' ? window.location.origin : '')) as string;
   
   if (!apiUrl) {
@@ -166,6 +170,8 @@ export async function startCheckout(pack: CreditPack): Promise<{ url: string }> 
       },
       body: JSON.stringify({
         pack,
+        // Hint preferred flow to backend so UPI appears first and variant is prioritized
+        ...(prefer ? { prefer } : {}),
       }),
     });
 

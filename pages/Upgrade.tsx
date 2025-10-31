@@ -6,7 +6,7 @@ import Testimonial from '../components/Testimonial';
 import FAQAccordion from '../components/FAQ';
 import Footer from '../components/Footer';
 import { useAuth } from '../contexts/AuthContext';
-import { CreditPack, startCheckout } from '../services/creditsService';
+import { CreditPack, startCheckout, type PaymentPreference } from '../services/creditsService';
 
 type Plan = {
   title: string;
@@ -102,7 +102,14 @@ const UpgradePage: React.FC = () => {
     try {
       setError(null);
       setLoadingPack(pack);
-      const { url } = await startCheckout(pack);
+
+      // Prefer UPI Apps on mobile (opens PhonePe/Paytm/GPay via intent),
+      // and UPI QR/ID on desktop (scan QR or enter VPA).
+      const ua = typeof navigator !== 'undefined' ? navigator.userAgent : '';
+      const isMobile = /Android|iPhone|iPad|iPod|IEMobile|Opera Mini/i.test(ua);
+      const prefer: PaymentPreference = isMobile ? 'upi_intent' : 'upi_collect';
+
+      const { url } = await startCheckout(pack, prefer);
       if (url) window.location.href = url;
     } catch (e: any) {
       setError(e?.message || 'Failed to start checkout');
@@ -222,6 +229,10 @@ const UpgradePage: React.FC = () => {
                 >
                   {plan.highlight ? 'Get Started' : 'Buy Now'}
                 </Button>
+
+                <p className="mt-2 text-[11px] sm:text-xs text-gray-400 text-center">
+                  Recommended: UPI. On mobile, you can pay via UPI apps (PhonePe, Paytm, Google Pay). On desktop, use UPI QR or enter your UPI ID. Cards are available as fallback.
+                </p>
                 
                 {error && loadingPack === plan.pack && (
                   <div className="mt-3 p-2 bg-red-900/30 border border-red-700/50 rounded-lg">

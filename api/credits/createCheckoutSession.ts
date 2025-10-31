@@ -5,6 +5,11 @@ type CreditPack = 100 | 200 | 300;
 
 interface CreateCheckoutBody {
   pack: CreditPack;
+  // Optional preference to hint which UPI flow to lead with on hosted checkout
+  // 'upi_intent' => opens UPI apps (PhonePe/Paytm/GPay) on mobile
+  // 'upi_collect' => shows QR and allows entering UPI ID (VPA)
+  // 'card' => user intentionally prefers paying by card
+  prefer?: 'upi_intent' | 'upi_collect' | 'card';
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -49,7 +54,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(401).json({ error: 'Invalid session' });
     }
 
-    const { pack } = req.body as CreateCheckoutBody;
+    const { pack, prefer } = req.body as CreateCheckoutBody;
     if (!pack) {
       console.error('Missing required fields:', { pack });
       return res.status(400).json({ error: 'Missing pack' });
@@ -116,20 +121,46 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // References:
     // - https://docs.dodopayments.com/developer-resources/checkout-session
     // - Allowed methods incl. UPI: upi_collect, upi_intent + keep credit/debit as fallback
+    // UX goal:
+    //  - Card should appear last (fallback)
+    //  - Avoid showing two UPI tiles ("UPI" and "UPI ID") when confusing; show a single UPI variant per device
+    // Behavior:
+    //  - Mobile: prefer 'upi_intent' (opens UPI apps like PhonePe/Paytm/GPay)
+    //  - Desktop: prefer 'upi_collect' (QR + UPI ID/VPA entry)
+    //  - If DODO_UPI_SINGLE=true (default), we only include the preferred UPI variant to prevent duplicate tiles
+    //  - If DODO_UPI_ONLY=true, completely hide cards
+    const baseUpi = ['upi_collect', 'upi_intent'] as const;
+    let upiOrder: string[] = [...baseUpi];
+    if (prefer === 'upi_intent') upiOrder = ['upi_intent', 'upi_collect'];
+    if (prefer === 'upi_collect') upiOrder = ['upi_collect', 'upi_intent'];
+
+    // env toggles
+    const upiOnly = String(process.env.DODO_UPI_ONLY || '').toLowerCase() === 'true';
+    const upiSingle = String(process.env.DODO_UPI_SINGLE || 'true').toLowerCase() === 'true';
+
+    // When single-variant mode is on and a preference is supplied, send only that UPI method
+    const upiList =
+      upiSingle && (prefer === 'upi_intent' || prefer === 'upi_collect')
+        ? [prefer]
+        : [...upiOrder];
+
+    // Keep cards as fallback unless explicitly disabled
+    const allowedPaymentMethodTypes = upiOnly ? [...upiList] : [...upiList, 'credit', 'debit'];
+
     const requestBody = {
       product_cart: [
         { product_id: productId, quantity: 1 },
       ],
-      // Prefer UPI for India; retain card fallbacks per docs
-      // Docs: "It's critical to include 'credit' and 'debit' as fallback options."
-      // https://docs.dodopayments.com/developer-resources/checkout-session
-      allowed_payment_method_types: ['upi_collect', 'upi_intent', 'credit', 'debit'],
-      // UPI requires INR; if your product is priced in INR this keeps checkout in INR
+      // Prefer UPI; optionally hide cards when DODO_UPI_ONLY=true
+      // Also optionally send a single UPI variant (DODO_UPI_SINGLE=true) to avoid two UPI tiles
+      allowed_payment_method_types: allowedPaymentMethodTypes,
+      // UPI typically settles in INR
       billing_currency: 'INR',
       // Keep checkout minimal for digital goods by omitting billing/shipping/customer address fields
       metadata: {
         user_id: userId,
         credit_pack: String(pack),
+        preferred_method: prefer || 'upi',
       },
       // return_url is used for redirect after payment completion
       return_url: `${appBaseUrl}/?status=success`,
