@@ -6,6 +6,7 @@ import Button from '../components/Button';
 import { useAuth } from '../contexts/AuthContext';
 import { generateImageBatch } from '../services/geminiService';
 import { creditsNeededPerImage } from '../services/creditsService';
+import { supabase } from '../lib/supabase';
 
 type PreviewItem = { id: string; dataUrl: string; meta: any; selected: boolean };
 
@@ -161,12 +162,22 @@ const AdminShowcasePage: React.FC = () => {
         inputDataUrl = await downscaleDataUrl(inputDataUrl, 1600, 0.9, 'image/jpeg').catch(()=>inputDataUrl!);
       }
       for (const p of sel) {
-        // downscale output as well
+        // downscale output then upload directly to Supabase Storage
         const outDataUrl = await downscaleDataUrl(p.dataUrl, 1600, 0.92, 'image/jpeg').catch(()=>p.dataUrl);
+        const outBlob = await (await fetch(outDataUrl)).blob();
+        const userId = (await supabase.auth.getUser()).data.user?.id || 'anon';
+        const path = `${userId}/out-${Date.now()}-${Math.random().toString(36).slice(2)}.jpg`;
+        const { error: upErr } = await supabase.storage.from('showcase').upload(path, outBlob, { upsert: true, contentType: 'image/jpeg' });
+        if (upErr) throw upErr;
+        const { data: urlData } = supabase.storage.from('showcase').getPublicUrl(path);
+        const public_url = urlData.publicUrl;
+        const storage_path = path;
+
+        const token = (await supabase.auth.getSession()).data.session?.access_token || '';
         const resp = await fetch(`${apiBase}/api/showcase/upload`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${(await (await import('../lib/supabase')).supabase.auth.getSession()).data.session?.access_token || ''}` },
-          body: JSON.stringify({ dataUrl: outDataUrl, inputDataUrl, ...p.meta }),
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({ public_url, storage_path, inputDataUrl, ...p.meta }),
         });
         if (!resp.ok) {
           const t = await resp.text();
