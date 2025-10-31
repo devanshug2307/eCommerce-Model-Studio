@@ -10,6 +10,9 @@ interface CreateCheckoutBody {
   // 'upi_collect' => shows QR and allows entering UPI ID (VPA)
   // 'card' => user intentionally prefers paying by card
   prefer?: 'upi_intent' | 'upi_collect' | 'card';
+  // Optional buyer phone number; helps some providers show UPI QR reliably on desktop
+  // Expected E.164, e.g. +9198XXXXXXXX; we'll normalize minimal Indian inputs server-side
+  phone?: string;
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -50,11 +53,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
     const userData = await userResp.json();
     const userId: string | undefined = userData?.id;
+    const userEmail: string | undefined =
+      userData?.email || userData?.user_metadata?.email || userData?.user?.email;
     if (!userId) {
       return res.status(401).json({ error: 'Invalid session' });
     }
 
-    const { pack, prefer } = req.body as CreateCheckoutBody;
+    const { pack, prefer, phone } = req.body as CreateCheckoutBody;
     if (!pack) {
       console.error('Missing required fields:', { pack });
       return res.status(400).json({ error: 'Missing pack' });
@@ -97,11 +102,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // Ensure APP_BASE_URL is set
     const appBaseUrl = process.env.APP_BASE_URL || 'https://e-commerce-model-studio.vercel.app';
-    console.log('Creating checkout session with:', { 
-      productId, 
-      userId, 
-      pack, 
+    console.log('Creating checkout session with:', {
+      productId,
+      userId,
+      pack,
       appBaseUrl,
+      prefer,
+      hasPhone: !!phone,
       apiKeyPrefix: apiKey.substring(0, 10) + '...' // Log only first 10 chars for security
     });
 
@@ -147,6 +154,30 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // Keep cards as fallback unless explicitly disabled
     const allowedPaymentMethodTypes = upiOnly ? [...upiList] : [...upiList, 'credit', 'debit'];
 
+    // Normalize Indian phone input (allow "98xxxxxxxx" -> "+9198xxxxxxxx")
+    const normalizedPhone = (() => {
+      if (!phone) return undefined;
+      let p = String(phone).trim();
+      // Remove spaces/hyphens
+      p = p.replace(/[\s-]/g, '');
+      // Add +91 if looks like 10-digit Indian mobile
+      if (/^[6-9]\d{9}$/.test(p)) return `+91${p}`;
+      if (/^\+?91[6-9]\d{9}$/.test(p)) return p.startsWith('+') ? p : `+${p}`;
+      // Fallback: if already in E.164, pass through; else ignore to avoid API issues
+      if (/^\+\d{10,15}$/.test(p)) return p;
+      return undefined;
+    })();
+
+    const customerBlock =
+      userEmail || normalizedPhone
+        ? {
+            customer: {
+              ...(userEmail ? { email: userEmail } : {}),
+              ...(normalizedPhone ? { phone_number: normalizedPhone } : {}),
+            },
+          }
+        : {};
+
     const requestBody = {
       product_cart: [
         { product_id: productId, quantity: 1 },
@@ -156,11 +187,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       allowed_payment_method_types: allowedPaymentMethodTypes,
       // UPI typically settles in INR
       billing_currency: 'INR',
-      // Keep checkout minimal for digital goods by omitting billing/shipping/customer address fields
+      // Provide minimal customer context (email/phone) to help UPI Collect show QR
+      ...customerBlock,
+      feature_flags: {
+        // Helps hosted checkout prompt for phone when required by UPI providers.
+        allow_phone_number_collection: true,
+      },
+      // Keep checkout minimal for digital goods by omitting full address objects
       metadata: {
         user_id: userId,
         credit_pack: String(pack),
         preferred_method: prefer || 'upi',
+        // Hint for analytics/UX; safe no-op for API if unrecognized.
+        upi_collect_hint: 'qr',
       },
       // return_url is used for redirect after payment completion
       return_url: `${appBaseUrl}/?status=success`,
