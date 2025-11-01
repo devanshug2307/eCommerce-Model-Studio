@@ -77,7 +77,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
               'apikey': SERVICE_ROLE_KEY,
               'Authorization': `Bearer ${SERVICE_ROLE_KEY}`,
             },
-            body: JSON.stringify({ user_id: userId, credits: 0 }),
+            body: JSON.stringify({ user_id: userId, credits: 30 }),
           });
           // Non-fatal if this fails; we still return 0
           if (!upsertResp.ok) {
@@ -91,7 +91,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         console.warn('Error creating user_credits row:', e);
       }
 
-      return res.status(200).json({ credits: 0, userId });
+      return res.status(200).json({ credits: 30, userId });
     }
 
     // Existing user row

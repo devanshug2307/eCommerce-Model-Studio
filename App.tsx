@@ -39,7 +39,7 @@ function App() {
     ethnicity: 'Caucasian',
     background: 'Studio White',
     pose: 'Standing',
-    imagesCount: 3,
+    imagesCount: 1,
   });
   const [generatedImages, setGeneratedImages] = useState<GeneratedImage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -172,7 +172,7 @@ function App() {
       setError('Please upload a product image first.');
       return;
     }
-    const imagesCount = options.imagesCount || 3;
+    const imagesCount = options.imagesCount || 1;
     const need = creditsNeededPerImage() * imagesCount;
     const use = await consumeCredits(need);
     if (!use.ok) {
@@ -266,7 +266,7 @@ function App() {
   };
 
   const isGenerateDisabled = !productImage || isLoading;
-  const estimatedCost = creditsNeededPerImage() * (options.imagesCount || 3);
+  const estimatedCost = creditsNeededPerImage() * (options.imagesCount || 1);
   const availableCredits = getCredits();
   const insufficientCredits = availableCredits < estimatedCost;
 

@@ -117,7 +117,7 @@ const OptionsPanel: React.FC<OptionsPanelProps> = ({ options, setOptions, isDisa
           <div className="flex flex-wrap gap-2">
             {imageCountOptions.map(c => (
               <span key={c}>
-                <OptionButton label={`${c}`} isSelected={(options.imagesCount || 3) === c} onClick={() => handleOptionChange('imagesCount', c as any)} disabled={isDisabled} />
+                <OptionButton label={`${c}`} isSelected={(options.imagesCount || 1) === c} onClick={() => handleOptionChange('imagesCount', c as any)} disabled={isDisabled} />
               </span>
             ))}
           </div>
